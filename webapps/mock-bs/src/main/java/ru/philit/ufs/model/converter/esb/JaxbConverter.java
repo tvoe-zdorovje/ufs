@@ -21,7 +21,7 @@ public class JaxbConverter {
   }
 
   /**
-   * Перобразует транспортный объект в строку xml формата.
+   * Преобразует транспортный объект в строку xml формата.
    */
   public String getXml(Object object) throws JAXBException {
     if (object == null) {

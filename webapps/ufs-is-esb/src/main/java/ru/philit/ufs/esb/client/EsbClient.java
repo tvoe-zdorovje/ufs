@@ -62,7 +62,7 @@ public class EsbClient {
   }
 
   /**
-   * Прослушиватель собщений от ЕКС к ЕФС через КСШ.
+   * Прослушиватель сообщений от ЕКС к ЕФС через КСШ.
    */
   @JmsListener(destination = "${jndi.esb.queue.out}")
   public void receiveMessage(final Message<String> message) {

@@ -23,7 +23,7 @@ public class OperationTask extends ExternalEntity {
   private Date changedDate;
   private Date statusChangedDate;
   /**
-   * Id пакета задач, заполняется при спечиальной выборке даннных.
+   * Id пакета задач, заполняется при специальной выборке данных.
    */
   private Long packageId;
 

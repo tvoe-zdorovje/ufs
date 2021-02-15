@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Статусы задач пекета операций.
+ * Статусы задач пакета операций.
  */
 public enum OperationTaskStatus {
 

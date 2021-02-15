@@ -240,7 +240,7 @@ public class AccountAdapter extends EksAdapter {
   }
 
   /**
-   * Возвращает объект запроса счета по момеру карты.
+   * Возвращает объект запроса счета по номеру карты.
    */
   public static SrvAccountByCardNumRq requestByCardNumber(String cardNumber) {
     SrvAccountByCardNumRq request = new SrvAccountByCardNumRq();

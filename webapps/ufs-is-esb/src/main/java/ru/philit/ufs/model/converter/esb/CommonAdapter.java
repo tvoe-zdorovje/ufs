@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Базовый класс для конверетров Транспортных объектов в Сущности.
+ * Базовый класс для конвертеров Транспортных объектов в Сущности.
  */
 public abstract class CommonAdapter {
 

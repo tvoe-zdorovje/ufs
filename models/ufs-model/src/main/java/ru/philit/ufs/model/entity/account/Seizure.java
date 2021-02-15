@@ -9,7 +9,7 @@ import lombok.ToString;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
 
 /**
- * Сощность записи об аресте суммы на счёте.
+ * Сущность записи об аресте суммы на счёте.
  */
 @EqualsAndHashCode(of = {"id"}, callSuper = false)
 @ToString

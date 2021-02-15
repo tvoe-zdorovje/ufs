@@ -8,14 +8,14 @@ import ru.philit.ufs.model.entity.esb.eks.HeaderInfoType;
 public abstract class EksAdapterBaseTest extends ConverterBaseTest {
 
   /**
-   * Возврфщфет заполненный HeaderInfoType.
+   * Возвращает заполненный HeaderInfoType.
    */
   public static HeaderInfoType headerInfo() {
     return EksAdapter.headerInfo();
   }
 
   /**
-   * Возврфщфет заполненный HeaderInfoType.
+   * Возвращает заполненный HeaderInfoType.
    * @param rqUid заданный requestId
    */
   public static HeaderInfoType headerInfo(String rqUid) {

@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Контейнер для списка обхектов из Мастер-системы.
+ * Контейнер для списка объектов из Мастер-системы.
  */
 @ToString
 @Getter
