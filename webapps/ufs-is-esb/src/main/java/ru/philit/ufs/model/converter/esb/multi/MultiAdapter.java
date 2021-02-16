@@ -1,5 +1,6 @@
 package ru.philit.ufs.model.converter.esb.multi;
 
+import ru.philit.ufs.model.converter.esb.asfs.OperationAdapter;
 import ru.philit.ufs.model.converter.esb.eks.AccountAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CheckFraudAdapter;
 import ru.philit.ufs.model.converter.esb.eks.CommissionAdapter;
@@ -14,6 +15,11 @@ import ru.philit.ufs.model.converter.esb.pprb.OperationTypeAdapter;
 import ru.philit.ufs.model.converter.esb.pprb.OperatorAdapter;
 import ru.philit.ufs.model.converter.esb.pprb.RepresentativeAdapter;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCommitOperationRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvCreateOperationRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetOperationRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvRollbackOperationRs;
+import ru.philit.ufs.model.entity.esb.asfs.SrvUpdOperationRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountByCardNumRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountByIdRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvAccountResiduesByIdRs;
@@ -125,6 +131,22 @@ public class MultiAdapter {
 
     } else if (source instanceof SrvCashSymbolsListRs) {
       return CashSymbolAdapter.convert((SrvCashSymbolsListRs) source);
+
+    } else if (source instanceof SrvCommitOperationRs) {
+      return OperationAdapter.convert((SrvCommitOperationRs) source);
+
+    } else if (source instanceof SrvCreateOperationRs) {
+      return OperationAdapter.convert((SrvCreateOperationRs) source);
+
+    } else if (source instanceof SrvRollbackOperationRs) {
+      return OperationAdapter.convert((SrvRollbackOperationRs) source);
+
+    } else if (source instanceof SrvUpdOperationRs) {
+      return OperationAdapter.convert((SrvUpdOperationRs) source);
+
+    } else if (source instanceof SrvGetOperationRs) {
+      return OperationAdapter.convert((SrvGetOperationRs) source);
+
     }
 
     return null;

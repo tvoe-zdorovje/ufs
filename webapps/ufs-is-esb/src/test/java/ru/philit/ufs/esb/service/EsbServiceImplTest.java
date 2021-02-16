@@ -30,6 +30,8 @@ import ru.philit.ufs.model.entity.common.ExternalEntityRequest;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
+import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
@@ -121,6 +123,7 @@ public class EsbServiceImplTest {
     Assert.assertEquals(sentMessage, TestData.ACCOUNT_REQUEST_XML);
   }
 
+  // FIXME: swap "expected" and "actual" args in Assert.assertEquals();
   @Test
   public void testSendRequests() throws IllegalAccessException {
     // given
@@ -317,6 +320,47 @@ public class EsbServiceImplTest {
     // then
     Assert.assertEquals(putRequests.size(), requestCount);
 
+    // given
+    request.setRequestData(new Operation());
+
+    // when
+    request.setEntityType(RequestType.COMMIT_OPERATION);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // when
+    request.setEntityType(RequestType.CREATE_OPERATION);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // when
+    request.setEntityType(RequestType.UPDATE_OPERATION);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // when
+    request.setEntityType(RequestType.ROLLBACK_OPERATION);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
+    // given
+    request.setRequestData(new GetOperationRequest());
+
+    // when
+    request.setEntityType(RequestType.GET_OPERATION);
+    esbService.sendRequest(request);
+    requestCount++;
+    // then
+    Assert.assertEquals(putRequests.size(), requestCount);
+
     // when
     request.setEntityType(WRONG_REQUEST_TYPE);
     esbService.sendRequest(request);
@@ -347,7 +391,9 @@ public class EsbServiceImplTest {
         RequestType.GET_REPRESENTATIVE_BY_CARD, RequestType.LEGAL_ENTITY_BY_ACCOUNT,
         RequestType.OPER_TYPES_BY_ROLE, RequestType.OPERATOR_BY_USER,
         RequestType.SEARCH_REPRESENTATIVE, RequestType.SEIZURES_BY_ACCOUNT,
-        RequestType.UPDATE_OPER_TASK, RequestType.UPDATE_OVN};
+        RequestType.UPDATE_OPER_TASK, RequestType.UPDATE_OVN, RequestType.COMMIT_OPERATION,
+        RequestType.CREATE_OPERATION, RequestType.ROLLBACK_OPERATION, RequestType.UPDATE_OPERATION,
+        RequestType.GET_OPERATION};
     for (String requestType : requestTypes) {
       // when
       request.setEntityType(requestType);
