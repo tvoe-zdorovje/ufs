@@ -32,8 +32,11 @@ import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
+import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
+import ru.philit.ufs.model.entity.oper.OperationStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
@@ -53,6 +56,7 @@ public class ResponseListenerTest {
   private static final String LEGAL_ENTITY_ID = "112";
   private static final String FIX_UUID = "4f04ce04-ac37-4ec9-9923-6a9a5a882a97";
   private static final String OVN_UID = "121212";
+  private static final String OPERATION_ID = "1448";
 
   private final IQueue<ExternalEntity> responseQueue = new MockIQueue<>(5);
   private final IMap<String, ExternalEntityRequest> requestMap = new MockIMap<>();
@@ -103,6 +107,19 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap =
       new MockIMap<>();
 
+  private final IMap<LocalKey<String>, ExternalEntityContainer<Operation>> commitOperationByIdMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> commitOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> rollbackOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap =
+      new MockIMap<>();
+
   @Mock
   private HazelcastServer hazelcastServer;
 
@@ -146,6 +163,12 @@ public class ResponseListenerTest {
     when(hazelcastServer.getRepresentativeByCardMap()).thenReturn(representativeByCardMap);
     when(hazelcastServer.getOperatorByUserMap()).thenReturn(operatorByUserMap);
     when(hazelcastServer.getCashSymbolsMap()).thenReturn(cashSymbolsMap);
+    when(hazelcastServer.getCommitOperationByIdMap()).thenReturn(commitOperationByIdMap);
+    when(hazelcastServer.getCommitOperationMap()).thenReturn(commitOperationMap);
+    when(hazelcastServer.getCreateOperationMap()).thenReturn(createOperationMap);
+    when(hazelcastServer.getRollbackOperationMap()).thenReturn(rollbackOperationMap);
+    when(hazelcastServer.getUpdOperationMap()).thenReturn(updOperationMap);
+    when(hazelcastServer.getOperationMap()).thenReturn(operationMap);
     responseListener.init();
   }
 
@@ -1209,6 +1232,297 @@ public class ResponseListenerTest {
     Assert.assertTrue(responseFlagMap.containsKey(request));
     LocalKey<CashSymbolRequest> localKey = new LocalKey<>(SESSION_ID, cashSymbolRequest);
     Assert.assertFalse(cashSymbolsMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_CommitOperationById() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.COMMIT_OPERATION_BY_ID);
+    request.setRequestData(OPERATION_ID);
+    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    response.setResponseCode("ok");
+    Operation operation = new Operation();
+    operation.setRequestUid(FIX_UUID);
+    operation.setReceiveDate(new Date());
+    operation.setId(OPERATION_ID);
+    operation.setStatus(OperationStatus.COMMITTED);
+    operation.setCommittedDate(new Date());
+    response.setData(operation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, OPERATION_ID);
+    Assert.assertTrue(commitOperationByIdMap.containsKey(localKey));
+    Assert.assertEquals(commitOperationByIdMap.get(localKey), response);
+  }
+
+  @Test
+  public void testItemAdded_CommitOperationById_Bad() throws Exception {
+    // given
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.COMMIT_OPERATION_BY_ID);
+    request.setRequestData(OPERATION_ID);
+    Operation operation = new Operation();
+    operation.setRequestUid(FIX_UUID);
+    operation.setReceiveDate(new Date());
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(operation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, OPERATION_ID);
+    Assert.assertFalse(commitOperationByIdMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_CommitOperation() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    reqOperation.setId(OPERATION_ID);
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.COMMIT_OPERATION);
+    request.setRequestData(reqOperation);
+
+    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    response.setResponseCode("ok");
+    Operation respOperation = new Operation();
+    respOperation.setId(OPERATION_ID);
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+    respOperation.setStatus(OperationStatus.COMMITTED);
+    respOperation.setCommittedDate(new Date());
+    response.setData(respOperation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertTrue(commitOperationMap.containsKey(localKey));
+    Assert.assertEquals(commitOperationMap.get(localKey), response);
+  }
+
+  @Test
+  public void testItemAdded_CommitOperation_Bad() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    reqOperation.setId(OPERATION_ID);
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.COMMIT_OPERATION);
+    request.setRequestData(reqOperation);
+
+    Operation respOperation = new Operation();
+    respOperation.setId(OPERATION_ID);
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+    respOperation.setStatus(OperationStatus.COMMITTED);
+    respOperation.setCommittedDate(new Date());
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(respOperation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertFalse(commitOperationMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_createOperation() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.CREATE_OPERATION);
+    request.setRequestData(reqOperation);
+
+    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    response.setResponseCode("ok");
+    Operation respOperation = new Operation();
+    response.setData(respOperation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertTrue(createOperationMap.containsKey(localKey));
+    Assert.assertEquals(createOperationMap.get(localKey), response);
+  }
+
+  @Test
+  public void testItemAdded_createOperation_Bad() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.COMMIT_OPERATION);
+    request.setRequestData(reqOperation);
+
+    Operation respOperation = new Operation();
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(respOperation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertFalse(createOperationMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_updOperation() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.UPDATE_OPERATION);
+    request.setRequestData(reqOperation);
+
+    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    response.setResponseCode("ok");
+    Operation respOperation = new Operation();
+    response.setData(respOperation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertTrue(updOperationMap.containsKey(localKey));
+    Assert.assertEquals(updOperationMap.get(localKey), response);
+  }
+
+  @Test
+  public void testItemAdded_updOperation_Bad() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.UPDATE_OPERATION);
+    request.setRequestData(reqOperation);
+
+    Operation respOperation = new Operation();
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(respOperation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertFalse(updOperationMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_rollbackOperation() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.ROLLBACK_OPERATION);
+    request.setRequestData(reqOperation);
+
+    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    response.setResponseCode("ok");
+    Operation respOperation = new Operation();
+    response.setData(respOperation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertTrue(rollbackOperationMap.containsKey(localKey));
+    Assert.assertEquals(rollbackOperationMap.get(localKey), response);
+  }
+
+  @Test
+  public void testItemAdded_rollbackOperation_Bad() throws Exception {
+    // given
+    Operation reqOperation = new Operation();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.ROLLBACK_OPERATION);
+    request.setRequestData(reqOperation);
+
+    Operation respOperation = new Operation();
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(respOperation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, reqOperation);
+    Assert.assertFalse(rollbackOperationMap.containsKey(localKey));
+  }
+
+  @Test
+  public void testItemAdded_getOperation() throws Exception {
+    // given
+    GetOperationRequest getOpRequest = new GetOperationRequest();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.GET_OPERATION);
+    request.setRequestData(getOpRequest);
+
+    ExternalEntityList<Operation> response = new ExternalEntityList<>();
+    response.setRequestUid(FIX_UUID);
+    response.setReceiveDate(new Date());
+    Operation respOperation = new Operation();
+    response.getItems().add(respOperation);
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(response);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<GetOperationRequest> localKey = new LocalKey<>(SESSION_ID, getOpRequest);
+    Assert.assertTrue(operationMap.containsKey(localKey));
+    Assert.assertEquals(operationMap.get(localKey), response.getItems());
+  }
+
+  @Test
+  public void testItemAdded_getOperation_Bad() throws Exception {
+    // given
+    GetOperationRequest getOpRequest = new GetOperationRequest();
+    ExternalEntityRequest request = new ExternalEntityRequest();
+    request.setSessionId(SESSION_ID);
+    request.setEntityType(RequestType.GET_OPERATION);
+    request.setRequestData(getOpRequest);
+
+    Operation respOperation = new Operation();
+    respOperation.setRequestUid(FIX_UUID);
+    respOperation.setReceiveDate(new Date());
+
+    // when
+    requestMap.put(FIX_UUID, request);
+    responseQueue.add(respOperation);
+    // then
+    Assert.assertTrue(responseFlagMap.containsKey(request));
+    LocalKey<GetOperationRequest> localKey = new LocalKey<>(SESSION_ID, getOpRequest);
+    Assert.assertFalse(operationMap.containsKey(localKey));
   }
 
   @Test

@@ -18,10 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
-import ru.philit.ufs.model.cache.mock.MockCacheImpl;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
@@ -56,8 +53,6 @@ public class OperationProviderTest {
 
   @Mock
   private OperationCache cache;
-  @Spy
-  private MockCache mockCache = new MockCacheImpl();
   @Mock
   private RepresentativeProvider representativeProvider;
 
@@ -66,7 +61,7 @@ public class OperationProviderTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    provider = new OperationProvider(representativeProvider, cache, mockCache);
+    provider = new OperationProvider(representativeProvider, cache);
   }
 
   @Test
@@ -179,6 +174,9 @@ public class OperationProviderTest {
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
     verify(cache, times(1))
         .addOperation(anyLong(), any(Operation.class));
+    verify(cache, times(1)).getOperation(anyLong());
+    verify(cache, times(1))
+        .commitOperation(any(Operation.class), any(ClientInfo.class));
     verifyNoMoreInteractions(cache);
   }
 
@@ -252,6 +250,9 @@ public class OperationProviderTest {
         .updateTasksInPackage(any(OperationPackage.class), any(ClientInfo.class));
     verify(cache, times(1))
         .addOperation(anyLong(), any(Operation.class));
+    verify(cache, times(1)).getOperation(anyLong());
+    verify(cache, times(1))
+        .commitOperation(any(Operation.class), any(ClientInfo.class));
     verifyNoMoreInteractions(cache);
   }
 
@@ -274,6 +275,9 @@ public class OperationProviderTest {
     verify(cache, times(1)).updateTasksInPackage(any(OperationPackage.class),
         any(ClientInfo.class));
     verify(cache, times(1)).addOperation(anyLong(), any(Operation.class));
+    verify(cache, times(1)).getOperation(anyLong());
+    verify(cache, times(1))
+        .cancelOperation(any(Operation.class), any(ClientInfo.class));
     verifyNoMoreInteractions(cache);
   }
 

@@ -33,10 +33,12 @@ import ru.philit.ufs.model.entity.account.RepresentativeRequest;
 import ru.philit.ufs.model.entity.account.Seizure;
 import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.LocalKey;
+import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -96,6 +98,18 @@ public class HazelcastCacheImplTest {
       new MockIMap<>();
   private final IMap<LocalKey<String>, Operator> operatorByUserMap = new MockIMap<>();
 
+
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> commitOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> rollbackOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap =
+      new MockIMap<>();
+  private final IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap =
+      new MockIMap<>();
+
   @Mock
   private HazelcastBeClient client;
   @Mock
@@ -131,6 +145,11 @@ public class HazelcastCacheImplTest {
     when(client.getRepresentativeMap()).thenReturn(representativeMap);
     when(client.getRepresentativeByCardNumberMap()).thenReturn(representativeByCardNumberMap);
     when(client.getOperatorByUserMap()).thenReturn(operatorByUserMap);
+    when(client.getCommitOperationMap()).thenReturn(commitOperationMap);
+    when(client.getCreateOperationMap()).thenReturn(createOperationMap);
+    when(client.getRollbackOperationMap()).thenReturn(rollbackOperationMap);
+    when(client.getUpdOperationMap()).thenReturn(updOperationMap);
+    when(client.getOperationMap()).thenReturn(operationMap);
 
     doAnswer(new Answer() {
       @Override
@@ -190,6 +209,15 @@ public class HazelcastCacheImplTest {
           case RequestType.OPERATOR_BY_USER:
             operatorByUserMap.put(key, new Operator());
             break;
+          case RequestType.COMMIT_OPERATION:
+            commitOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            break;
+          case RequestType.CREATE_OPERATION:
+            createOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            break;
+          case RequestType.ROLLBACK_OPERATION:
+            rollbackOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            break;
           default:
         }
         return null;
@@ -224,13 +252,10 @@ public class HazelcastCacheImplTest {
     assertNotNull(cache.getRepresentativeByCriteria(new RepresentativeRequest("1"), CLIENT_INFO));
     assertNotNull(cache.getRepresentativesByCriteria(new RepresentativeRequest("1"), CLIENT_INFO));
     assertNotNull(cache.getCashSymbols(new CashSymbolRequest(), CLIENT_INFO));
-    assertNotNull(cache.getOperator("1", CLIENT_INFO));
-
-    Operation operation = new Operation();
-    operation.setId(OPERATION_ID);
-    cache.addOperation(1L, operation);
-    assertNotNull(cache.getOperation(1L));
-    assertEquals(cache.getOperation(1L).getId(), OPERATION_ID);
+    assertNotNull(cache.commitOperation(new Operation(), CLIENT_INFO));
+    assertNotNull(cache.cancelOperation(new Operation(), CLIENT_INFO));
+    assertNotNull(cache.createOperation("1", OperationTypeCode.TO_CARD_DEPOSIT.code(),
+        CLIENT_INFO));
   }
 
   @Test
@@ -248,6 +273,32 @@ public class HazelcastCacheImplTest {
     List<OperationTypeFavourite> favourites = cache.getOperationTypeFavourites(CLIENT_INFO);
     assertNotNull(favourites);
     assertEquals(favourites.size(), 1);
+  }
+
+  @Test
+  public void testOperationCache() throws Exception {
+    assertEquals(0, client.getCreateOperationMap().size());
+
+    Operation operation =
+        cache.createOperation("workplaceId", OperationTypeCode.TO_CARD_DEPOSIT.code(),
+        CLIENT_INFO);
+    assertEquals(1, client.getCreateOperationMap().size());
+
+    LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, operation);
+    assertEquals(operation, client.getCreateOperationMap().get(localKey).getData());
+
+    assertEquals(0, client.getCommitOperationMap().size());
+
+    cache.commitOperation(operation, CLIENT_INFO);
+    assertEquals(1, client.getCommitOperationMap().size());
+    assertEquals(operation, client.getCommitOperationMap().get(localKey).getData());
+
+    assertEquals(0, client.getRollbackOperationMap().size());
+
+    cache.cancelOperation(operation, CLIENT_INFO);
+    assertEquals(1, client.getRollbackOperationMap().size());
+    assertEquals(operation, client.getRollbackOperationMap().get(localKey).getData());
+
   }
 
   @Test

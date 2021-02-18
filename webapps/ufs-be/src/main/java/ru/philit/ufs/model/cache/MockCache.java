@@ -19,10 +19,4 @@ public interface MockCache {
 
   boolean checkOverLimit(BigDecimal amount);
 
-  Operation createOperation(String workplaceId, String operationTypeCode);
-
-  Operation commitOperation(Operation operation);
-
-  Operation cancelOperation(Operation operation);
-
 }

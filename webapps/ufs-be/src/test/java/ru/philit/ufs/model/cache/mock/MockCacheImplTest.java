@@ -82,29 +82,4 @@ public class MockCacheImplTest {
     // then
     assertNotNull(workplace);
   }
-
-  @Test
-  public void testCreateOperation() throws Exception {
-    // given
-    String workplaceId = "AC11921E8E1247009ED17924B8CD9E72";
-    String operationTypeCode = "ToCardDeposit";
-
-    // when
-    Operation operation = cache.createOperation(workplaceId, operationTypeCode);
-
-    // then
-    assertNotNull(operation);
-  }
-
-  @Test
-  public void testCommitOperation() throws Exception {
-    // given
-    Operation operation = new Operation();
-
-    // when
-    operation = cache.commitOperation(operation);
-
-    // then
-    assertNotNull(operation);
-  }
 }

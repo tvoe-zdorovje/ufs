@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.oper.Operation;
@@ -26,17 +25,14 @@ public class OperationProvider {
 
   private final RepresentativeProvider representativeProvider;
   private final OperationCache cache;
-  private final MockCache mockCache;
 
   /**
    * Конструктор бина.
    */
   @Autowired
-  public OperationProvider(RepresentativeProvider representativeProvider, OperationCache cache,
-      MockCache mockCache) {
+  public OperationProvider(RepresentativeProvider representativeProvider, OperationCache cache) {
     this.representativeProvider = representativeProvider;
     this.cache = cache;
-    this.mockCache = mockCache;
   }
 
   /**
@@ -148,28 +144,8 @@ public class OperationProvider {
    */
   public Operation confirmOperation(Long packageId, Long taskId, String workplaceId,
       String operationTypeCode, ClientInfo clientInfo) {
-    if (packageId == null) {
-      throw new InvalidDataException("Отсутствует запрашиваемый идентификатор пакета задач");
-    }
-    if (taskId == null) {
-      throw new InvalidDataException("Отсутствует запрашиваемый идентификатор задачи");
-    }
-    if (StringUtils.isEmpty(workplaceId)) {
-      throw new InvalidDataException("Отсутствует запрашиваемый номер УРМ/кассы");
-    }
-    if (StringUtils.isEmpty(operationTypeCode)) {
-      throw new InvalidDataException("Отсутствует запрашиваемый код типа операции");
-    }
-
-    OperationTasksRequest getTasksRequest = new OperationTasksRequest();
-    getTasksRequest.setPackageId(packageId);
-
-    OperationPackage opPackage = cache.getTasksInPackage(getTasksRequest, clientInfo);
-    if (opPackage == null) {
-      throw new InvalidDataException("Запрашиваемый пакет задач не найден");
-    }
-
-    List<OperationTask> depositTasks = opPackage.getToCardDeposits();
+    List<OperationTask> depositTasks =
+        validateAndGetDepositTasks(packageId, taskId, workplaceId, operationTypeCode, clientInfo);
     for (OperationTask operationTask : depositTasks) {
       if (operationTask.getId().equals(taskId)) {
         operationTask.setStatus(OperationTaskStatus.COMPLETED);
@@ -182,8 +158,8 @@ public class OperationProvider {
 
     cache.updateTasksInPackage(updateTasksPackage, clientInfo);
 
-    Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
-    operation = mockCache.commitOperation(operation);
+    Operation operation = cache.getOperation(taskId);
+    operation = cache.commitOperation(operation, clientInfo);
     cache.addOperation(taskId, operation);
 
     return operation;
@@ -200,6 +176,44 @@ public class OperationProvider {
    */
   public Operation cancelOperation(Long packageId, Long taskId, String workplaceId,
       String operationTypeCode, ClientInfo clientInfo) {
+    List<OperationTask> depositTasks =
+        validateAndGetDepositTasks(packageId, taskId, workplaceId, operationTypeCode, clientInfo);
+    for (OperationTask operationTask : depositTasks) {
+      if (operationTask.getId().equals(taskId)) {
+        operationTask.setStatus(OperationTaskStatus.DECLINED);
+        break;
+      }
+    }
+    OperationPackage updateTasksPackage = new OperationPackage();
+    updateTasksPackage.setId(packageId);
+    updateTasksPackage.setToCardDeposits(depositTasks);
+    cache.updateTasksInPackage(updateTasksPackage, clientInfo);
+
+    Operation operation = cache.getOperation(taskId);
+    operation = cache.cancelOperation(operation, clientInfo);
+
+    cache.addOperation(taskId, operation);
+
+    return operation;
+  }
+
+  private List<OperationTask> validateAndGetDepositTasks(Long packageId, Long taskId,
+      String workplaceId, String operationTypeCode, ClientInfo clientInfo) {
+
+    validate(packageId, taskId, workplaceId, operationTypeCode);
+
+    OperationTasksRequest getTasksRequest = new OperationTasksRequest();
+    getTasksRequest.setPackageId(packageId);
+    OperationPackage opPackage = cache.getTasksInPackage(getTasksRequest, clientInfo);
+    if (opPackage == null) {
+      throw new InvalidDataException("Запрашиваемый пакет задач не найден");
+    }
+
+    return opPackage.getToCardDeposits();
+  }
+
+  private void validate(Long packageId, Long taskId, String workplaceId,
+      String operationTypeCode) {
     if (packageId == null) {
       throw new InvalidDataException("Отсутствует запрашиваемый идентификатор пакета задач");
     }
@@ -212,31 +226,5 @@ public class OperationProvider {
     if (StringUtils.isEmpty(operationTypeCode)) {
       throw new InvalidDataException("Отсутствует запрашиваемый код типа операции");
     }
-
-    OperationTasksRequest getTasksRequest = new OperationTasksRequest();
-    getTasksRequest.setPackageId(packageId);
-    OperationPackage opPackage = cache.getTasksInPackage(getTasksRequest, clientInfo);
-    if (opPackage == null) {
-      throw new InvalidDataException("Запрашиваемый пакет задач не найден");
-    }
-
-    List<OperationTask> depositTasks = opPackage.getToCardDeposits();
-    for (OperationTask operationTask : depositTasks) {
-      if (operationTask.getId().equals(taskId)) {
-        operationTask.setStatus(OperationTaskStatus.DECLINED);
-        break;
-      }
-    }
-    OperationPackage updateTasksPackage = new OperationPackage();
-    updateTasksPackage.setId(packageId);
-    updateTasksPackage.setToCardDeposits(depositTasks);
-    cache.updateTasksInPackage(updateTasksPackage, clientInfo);
-
-    Operation operation = mockCache.createOperation(workplaceId, operationTypeCode);
-    operation = mockCache.cancelOperation(operation);
-
-    cache.addOperation(taskId, operation);
-
-    return operation;
   }
 }

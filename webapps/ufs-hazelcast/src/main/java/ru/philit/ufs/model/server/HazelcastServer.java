@@ -9,9 +9,13 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUES
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMISSION_BY_ACCOUNT_OPERATION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMIT_OPERATION_BY_ID_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMIT_OPERATION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CREATE_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LEGAL_ENTITY_BY_ACCOUNT_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LOGGED_EVENTS;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_BY_TASK_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_INFO_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_RESPONSE_MAP;
@@ -29,7 +33,9 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.REQUEST_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.REQUEST_QUEUE;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.RESPONSE_FLAG_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.RESPONSE_QUEUE;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ROLLBACK_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.SEIZURES_BY_ACCOUNT_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.UPD_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.USER_BY_SESSION_MAP;
 
 import com.hazelcast.config.Config;
@@ -66,6 +72,7 @@ import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -173,6 +180,16 @@ public class HazelcastServer {
 
   @Getter private IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap;
 
+  @Getter private IMap<LocalKey<String>, ExternalEntityContainer<Operation>>
+      commitOperationByIdMap;
+  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
+      commitOperationMap;
+  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap;
+  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
+      rollbackOperationMap;
+  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap;
+  @Getter private IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap;
+
   /**
    * Конструктор бина.
    */
@@ -241,7 +258,9 @@ public class HazelcastServer {
         PAY_ORDERS_CARD_INDEX_1_BY_ACCOUNT_MAP, PAY_ORDERS_CARD_INDEX_2_BY_ACCOUNT_MAP,
         COMMISSION_BY_ACCOUNT_OPERATION_MAP, CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP,
         OVN_BY_UID_MAP, OVNS_MAP, ACCOUNT_20202_BY_WORK_PLACE_MAP, OPERATION_TYPES_BY_ROLES_MAP,
-        REPRESENTATIVE_MAP, REPRESENTATIVE_BY_CARD_MAP, OPERATOR_BY_USER_MAP, CASH_SYMBOLS_MAP}) {
+        REPRESENTATIVE_MAP, REPRESENTATIVE_BY_CARD_MAP, OPERATOR_BY_USER_MAP, CASH_SYMBOLS_MAP,
+        COMMIT_OPERATION_BY_ID_MAP, CREATE_OPERATION_MAP, ROLLBACK_OPERATION_MAP,
+        UPD_OPERATION_MAP, OPERATION_MAP}) {
       MapConfig mapConfig = new MapConfig();
       mapConfig.setName(mapName);
       mapConfig.setTimeToLiveSeconds(3600);
@@ -288,6 +307,13 @@ public class HazelcastServer {
     representativeByCardMap = instance.getMap(REPRESENTATIVE_BY_CARD_MAP);
     operatorByUserMap = instance.getMap(OPERATOR_BY_USER_MAP);
     cashSymbolsMap = instance.getMap(CASH_SYMBOLS_MAP);
+
+    commitOperationByIdMap = instance.getMap(COMMIT_OPERATION_BY_ID_MAP);
+    commitOperationMap = instance.getMap(COMMIT_OPERATION_MAP);
+    createOperationMap = instance.getMap(CREATE_OPERATION_MAP);
+    rollbackOperationMap = instance.getMap(ROLLBACK_OPERATION_MAP);
+    updOperationMap = instance.getMap(UPD_OPERATION_MAP);
+    operationMap = instance.getMap(OPERATION_MAP);
 
     logger.info("Hazelcast server for {} is started", instance.getName());
   }

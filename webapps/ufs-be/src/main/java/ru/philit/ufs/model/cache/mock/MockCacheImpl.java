@@ -117,31 +117,4 @@ public class MockCacheImpl implements MockCache {
   public boolean checkOverLimit(BigDecimal amount) {
     return amount.compareTo(MAX_LIMIT) <= 0;
   }
-
-  @Override
-  public Operation createOperation(String workplaceId, String operationTypeCode) {
-    Operation operation = new Operation();
-
-    operation.setId(UuidUtils.getRandomUuid());
-    operation.setWorkplaceId(workplaceId);
-    operation.setStatus(OperationStatus.NEW);
-    operation.setTypeCode(OperationTypeCode.getByCode(operationTypeCode));
-    operation.setCreatedDate(new Date());
-
-    return operation;
-  }
-
-  @Override
-  public Operation commitOperation(Operation operation) {
-    operation.setStatus(OperationStatus.COMMITTED);
-    operation.setCommittedDate(new Date());
-    return operation;
-  }
-
-  @Override
-  public Operation cancelOperation(Operation operation) {
-    operation.setStatus(OperationStatus.CANCELLED);
-    operation.setRollbackReason("Отменено пользователем");
-    return operation;
-  }
 }

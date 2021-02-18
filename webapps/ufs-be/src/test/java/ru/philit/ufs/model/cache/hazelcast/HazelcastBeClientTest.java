@@ -76,6 +76,11 @@ public class HazelcastBeClientTest {
     hazelcastBeClient.getOperationPackageResponseMap();
     hazelcastBeClient.getRepresentativeMap();
     hazelcastBeClient.getRepresentativeByCardNumberMap();
+    hazelcastBeClient.getCommitOperationMap();
+    hazelcastBeClient.getCreateOperationMap();
+    hazelcastBeClient.getUpdOperationMap();
+    hazelcastBeClient.getRollbackOperationMap();
+    hazelcastBeClient.getOperationMap();
   }
 
   @Test

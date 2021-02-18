@@ -8,7 +8,9 @@ import static ru.philit.ufs.model.entity.request.RequestType.ADD_OPER_TASK;
 import static ru.philit.ufs.model.entity.request.RequestType.CARD_INDEX_ELEMENTS_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.CASH_SYMBOL;
 import static ru.philit.ufs.model.entity.request.RequestType.CHECK_OPER_PACKAGE;
+import static ru.philit.ufs.model.entity.request.RequestType.COMMIT_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
+import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN;
@@ -17,6 +19,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.GET_REPRESENTATIVE_
 import static ru.philit.ufs.model.entity.request.RequestType.LEGAL_ENTITY_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.OPERATOR_BY_USER;
 import static ru.philit.ufs.model.entity.request.RequestType.OPER_TYPES_BY_ROLE;
+import static ru.philit.ufs.model.entity.request.RequestType.ROLLBACK_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.SEARCH_REPRESENTATIVE;
 import static ru.philit.ufs.model.entity.request.RequestType.SEIZURES_BY_ACCOUNT;
 import static ru.philit.ufs.model.entity.request.RequestType.UPDATE_OPER_TASK;
@@ -25,6 +28,7 @@ import com.google.common.collect.Iterables;
 import com.hazelcast.core.IMap;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +54,7 @@ import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
+import ru.philit.ufs.model.entity.oper.OperationStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
@@ -227,6 +232,38 @@ public class HazelcastCacheImpl
     return requestDataFromExternal(
         request, client.getOperationPackageMap(), GET_OPER_TASKS, clientInfo
     );
+  }
+
+  @Override
+  public Operation createOperation(String workplaceId, String operationTypeCode,
+      ClientInfo clientInfo) {
+    Operation operation = new Operation();
+    operation.setWorkplaceId(workplaceId);
+    operation.setOperatorId(operationTypeCode);
+    return requestDataFromExternal(operation, client.getCreateOperationMap(), CREATE_OPERATION,
+        clientInfo).getData();
+  }
+
+  @Override
+  public Operation commitOperation(Operation operation, ClientInfo clientInfo) {
+    final ExternalEntityContainer<Operation> response =
+        requestDataFromExternal(
+            operation, client.getCommitOperationMap(), COMMIT_OPERATION, clientInfo);
+    // if (!response.getResponseCode().equals("ok")) {
+    // error handling...?
+    // }
+    return response.getData();
+  }
+
+  @Override
+  public Operation cancelOperation(Operation operation, ClientInfo clientInfo) {
+    final ExternalEntityContainer<Operation> response =
+        requestDataFromExternal(
+            operation, client.getRollbackOperationMap(), ROLLBACK_OPERATION, clientInfo);
+    // if (!response.getResponseCode().equals("ok")) {
+    // error handling...?
+    // }
+    return response.getData();
   }
 
   @Override

@@ -48,6 +48,13 @@ public final class CollectionNames {
   public static final String OPERATOR_BY_USER_MAP = "operatorByUserMap";
   public static final String CASH_SYMBOLS_MAP = "cashSymbolsMap";
 
+  public static final String COMMIT_OPERATION_BY_ID_MAP = "commitOperationByIdMap";
+  public static final String COMMIT_OPERATION_MAP = "commitOperationMap";
+  public static final String CREATE_OPERATION_MAP = "createOperationMap";
+  public static final String ROLLBACK_OPERATION_MAP = "rollbackOperationMap";
+  public static final String UPD_OPERATION_MAP = "updOperationMap";
+  public static final String OPERATION_MAP = "operationMap";
+
   private CollectionNames() {
   }
 

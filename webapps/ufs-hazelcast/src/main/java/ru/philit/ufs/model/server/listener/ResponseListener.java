@@ -25,6 +25,8 @@ import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
+import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
@@ -291,6 +293,61 @@ public class ResponseListener
           hazelcastServer.getCashSymbolsMap().put(
               new LocalKey<>(request.getSessionId(), (CashSymbolRequest) request.getRequestData()),
               ((ExternalEntityList<CashSymbol>) entity).getItems());
+        }
+        break;
+
+      case RequestType.COMMIT_OPERATION_BY_ID:
+        if (entity instanceof ExternalEntityContainer
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getCommitOperationByIdMap().put(
+              new LocalKey<>(request.getSessionId(), (String) request.getRequestData()),
+              (ExternalEntityContainer<Operation>) entity);
+        }
+        break;
+
+      case RequestType.COMMIT_OPERATION:
+        if (entity instanceof ExternalEntityContainer
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getCommitOperationMap().put(
+              new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
+              (ExternalEntityContainer<Operation>) entity);
+        }
+        break;
+
+      case RequestType.CREATE_OPERATION:
+        if (entity instanceof ExternalEntityContainer
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getCreateOperationMap().put(
+              new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
+              (ExternalEntityContainer<Operation>) entity);
+        }
+        break;
+
+      case RequestType.ROLLBACK_OPERATION:
+        if (entity instanceof ExternalEntityContainer
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getRollbackOperationMap().put(
+              new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
+              (ExternalEntityContainer<Operation>) entity);
+        }
+        break;
+
+      case RequestType.UPDATE_OPERATION:
+        if (entity instanceof ExternalEntityContainer
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getUpdOperationMap().put(
+              new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
+              (ExternalEntityContainer<Operation>) entity);
+        }
+        break;
+
+      case RequestType.GET_OPERATION:
+        if (entity instanceof ExternalEntityList
+            && (elementClass1 == null || elementClass1 == Operation.class)) {
+          hazelcastServer.getOperationMap().put(
+              new LocalKey<>(
+                  request.getSessionId(), (GetOperationRequest) request.getRequestData()),
+              ((ExternalEntityList<Operation>) entity).getItems());
         }
         break;
 

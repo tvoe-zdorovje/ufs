@@ -6,9 +6,12 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ACCOUNT_RESIDU
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUESTS;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMISSION_BY_ACCOUNT_OPERATION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMIT_OPERATION_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CREATE_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LEGAL_ENTITY_BY_ACCOUNT_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LOGGED_EVENTS;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_BY_TASK_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_INFO_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.OPERATION_PACKAGE_RESPONSE_MAP;
@@ -23,7 +26,9 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.REPRESENTATIVE
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.REPRESENTATIVE_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.REQUEST_QUEUE;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.RESPONSE_FLAG_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.ROLLBACK_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.SEIZURES_BY_ACCOUNT_MAP;
+import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.UPD_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.USER_BY_SESSION_MAP;
 
 import com.hazelcast.client.HazelcastClient;
@@ -56,6 +61,7 @@ import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -139,6 +145,19 @@ public class HazelcastBeClient {
   @Getter
   private IMap<LocalKey<String>, Operator> operatorByUserMap;
 
+  @Getter
+  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
+      commitOperationMap;
+  @Getter
+  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap;
+  @Getter
+  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
+      rollbackOperationMap;
+  @Getter
+  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap;
+  @Getter
+  private IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap;
+
   @Autowired
   public HazelcastBeClient(
       HazelcastInstance hazelcastClient, HazelcastClientBeProperties properties
@@ -186,6 +205,12 @@ public class HazelcastBeClient {
     representativeByCardNumberMap = instance.getMap(REPRESENTATIVE_BY_CARD_MAP);
 
     operatorByUserMap = instance.getMap(OPERATOR_BY_USER_MAP);
+
+    commitOperationMap = instance.getMap(COMMIT_OPERATION_MAP);
+    createOperationMap = instance.getMap(CREATE_OPERATION_MAP);
+    rollbackOperationMap = instance.getMap(ROLLBACK_OPERATION_MAP);
+    updOperationMap = instance.getMap(UPD_OPERATION_MAP);
+    operationMap = instance.getMap(OPERATION_MAP);
 
     logger.info("{} started", this.getClass().getSimpleName());
   }
