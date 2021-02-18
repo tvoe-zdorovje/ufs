@@ -57,6 +57,12 @@ public class HazelcastMockServer {
    */
   @Getter private IMap<String, Long> packageIdByInn;
 
+  /*
+   * Содержит объекты операций в формате json.
+   * Ключ коллекции - operationId
+   */
+  @Getter private IMap<String, String> operationsById;
+
   /**
    * Конструктор бина.
    */
@@ -100,6 +106,7 @@ public class HazelcastMockServer {
     taskStatuses = instance.getMap("taskStatuses");
     packageById = instance.getMap("packageById");
     packageIdByInn = instance.getMap("packageIdByInn");
+    operationsById = instance.getMap("operationsById");
   }
 
   /**

@@ -1,8 +1,11 @@
 package ru.philit.ufs.model.cache;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.xml.datatype.XMLGregorianCalendar;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetOperationRs.SrvGetOperationRsMessage.OperationItem;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
 import ru.philit.ufs.model.entity.oper.OperationPackageInfo;
@@ -34,4 +37,10 @@ public interface MockCache {
         searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
         Date toDate, List<Long> taskIds);
 
+  void saveOperation(OperationItem operationItem);
+
+  OperationItem getOperation(String operationId);
+
+  Collection<OperationItem> getOperations(XMLGregorianCalendar createdFrom,
+      XMLGregorianCalendar createdTo);
 }

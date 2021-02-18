@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.philit.ufs.model.cache.MockCache;
+import ru.philit.ufs.model.entity.esb.asfs.SrvGetOperationRs.SrvGetOperationRsMessage.OperationItem;
 import ru.philit.ufs.model.entity.esb.eks.PkgStatusType;
 import ru.philit.ufs.model.entity.esb.eks.PkgTaskStatusType;
 import ru.philit.ufs.model.entity.esb.eks.SrvGetTaskClOperPkgRs.SrvGetTaskClOperPkgRsMessage;
@@ -85,7 +88,7 @@ public class HazelcastMockCacheImpl implements MockCache {
     if (!collection.containsKey(packageId)) {
       collection.put(packageId, new HashMap<Long, String>());
     }
-    Long realTaskId = taskId == null ? (long)(Math.random() * 1000000) : taskId;
+    Long realTaskId = taskId == null ? (long) (Math.random() * 1000000) : taskId;
     try {
       final Map<Long, String> taskMap = collection.get(packageId);
       String taskJson = jsonMapper.writeValueAsString(taskBody);
@@ -126,7 +129,7 @@ public class HazelcastMockCacheImpl implements MockCache {
   @Override
   public synchronized OperationPackageInfo createPackage(String inn, String workplaceId,
       String userLogin) {
-    Long packageId = (long)(Math.random() * 10000);
+    Long packageId = (long) (Math.random() * 10000);
     OperationPackageInfo packageInfo = new OperationPackageInfo();
     packageInfo.setId(packageId);
     packageInfo.setInn(inn);
@@ -146,8 +149,8 @@ public class HazelcastMockCacheImpl implements MockCache {
 
   @Override
   public Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>>
-        searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
-        Date toDate, List<Long> taskIds) {
+      searchTasksCardDeposit(Long packageId, PkgTaskStatusType taskStatus, Date fromDate,
+      Date toDate, List<Long> taskIds) {
     Map<Long, List<SrvGetTaskClOperPkgRsMessage.PkgItem.ToCardDeposit.TaskItem>> targetLists =
         new HashMap<>();
     Collection<Long> packageIds = (packageId != null)
@@ -197,6 +200,68 @@ public class HazelcastMockCacheImpl implements MockCache {
         logger.error("Error on deserialize", e);
       }
     }
+  }
+
+  @Override
+  public void saveOperation(OperationItem operationItem) {
+    String operationId =
+        operationItem.getOperationId() == null ? String.valueOf((Math.random() * 1000000))
+            : operationItem.getOperationId();
+    operationItem.setOperationId(operationId);
+    hazelcastServer.getOperationsById().put(operationId, serializeOperationItem(operationItem));
+  }
+
+  @Override
+  public OperationItem getOperation(String operationId) {
+    return deserializeOperationItem(hazelcastServer.getOperationsById().get(operationId));
+  }
+
+  @Override
+  public Collection<OperationItem> getOperations(final XMLGregorianCalendar createdFrom,
+      final XMLGregorianCalendar createdTo) {
+
+    List<OperationItem> operationItems = new ArrayList<>();
+    for (String operationJson : hazelcastServer.getOperationsById().values()) {
+      OperationItem operationItem = deserializeOperationItem(operationJson);
+      if (operationItem == null) {
+        continue;
+      }
+      boolean isBtwn = true;
+      if (createdFrom != null) {
+        final int comparisonResult = operationItem.getCreatedDttm().compare(createdFrom);
+        isBtwn = comparisonResult == DatatypeConstants.EQUAL
+            || comparisonResult == DatatypeConstants.GREATER;
+      }
+      if (createdTo != null) {
+        isBtwn =
+            isBtwn && operationItem.getCreatedDttm().compare(createdTo) <= DatatypeConstants.EQUAL;
+      }
+      if (isBtwn) {
+        operationItems.add(operationItem);
+      }
+    }
+    return operationItems;
+  }
+
+  private String serializeOperationItem(OperationItem operationItem) {
+    try {
+      return jsonMapper.writeValueAsString(operationItem);
+    } catch (JsonProcessingException e) {
+      logger.error("Error on serialize", e);
+    }
+    return "";
+  }
+
+  private OperationItem deserializeOperationItem(String json) {
+    try {
+      if (json == null) {
+        return null;
+      }
+      return jsonMapper.readValue(json, OperationItem.class);
+    } catch (Exception e) {
+      logger.error("Error on deserialize", e);
+    }
+    return null;
   }
 
   private Date truncateTime(Date date) {
