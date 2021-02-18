@@ -2,15 +2,18 @@ package ru.philit.ufs.web.mapping.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import org.junit.Test;
 import ru.philit.ufs.model.entity.account.IdentityDocument;
 import ru.philit.ufs.model.entity.account.IdentityDocumentType;
 import ru.philit.ufs.model.entity.account.Representative;
-import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
-import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
+import ru.philit.ufs.model.entity.common.OperationTypeCode;
+import ru.philit.ufs.model.entity.oper.Operation;
+import ru.philit.ufs.model.entity.oper.OperationStatus;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Subbranch;
 import ru.philit.ufs.model.entity.user.User;
@@ -19,9 +22,10 @@ import ru.philit.ufs.web.mapping.OperationJournalMapper;
 
 public class OperationJournalMapperImplTest {
 
-  private static final Long OPERATION_ID = 55555L;
+  private static final String OPERATION_ID = "55555L";
   private static final String OPERATION_DATE = "31.05.2017 14:35:04";
   private static final String OPERATION_INN = "77700055522244";
+  private static final OperationStatus OPERATION_STATUS = OperationStatus.PENDING;
   private static final String LEGAL_ENTITY_NAME = "Legal Entity";
   private static final BigDecimal OPERATION_AMOUNT = BigDecimal.valueOf(1400);
   private static final BigDecimal COMMISSION_AMOUNT = BigDecimal.valueOf(14.5);
@@ -73,7 +77,7 @@ public class OperationJournalMapperImplTest {
   @Test
   public void testAsDto_OperationTaskCardDeposit() throws Exception {
     // given
-    OperationTaskCardDeposit task = getOperationTaskCardDeposit();
+    Operation operation = getOperation();
     User user = new User(USER_LOGIN);
     user.setPosition(USER_POSITION);
     Subbranch subbranch = new Subbranch(SUBBRANCH_ID, TB_CODE, GOSB_CODE, OSB_CODE, VSP_CODE,
@@ -87,7 +91,7 @@ public class OperationJournalMapperImplTest {
         .withOperator(mapper.asDto(operator))
         .withUser(mapper.asDto(user))
         .withRepresentative(mapper.asDto(representative))
-        .withDeposit(mapper.asDto(task))
+        .withOperation(mapper.asDto(operation))
         .withCommission(mapper.asDto(COMMISSION_AMOUNT));
 
     // then
@@ -104,14 +108,14 @@ public class OperationJournalMapperImplTest {
     assertEquals(dto.getOperator().getPhoneMobile(), OPER_PHONE_MOB);
     assertEquals(dto.getOperator().getPhoneWork(), OPER_PHONE_WORK);
     assertEquals(dto.getUser().getPosition(), USER_POSITION);
-    //assertEquals(dto.getOperation().getId(), String.valueOf(OPERATION_ID));
-    //assertEquals(dto.getOperation().getTypeCode(), OperationTypeCode.TO_CARD_DEPOSIT.code());
-    //assertEquals(dto.getOperation().getTypeName(), OperationTypeCode.TO_CARD_DEPOSIT.value());
-    //assertEquals(dto.getOperation().getCreatedDate(), OPERATION_DATE);
-    //assertEquals(dto.getOperation().getInn(), OPERATION_INN);
-    //assertEquals(dto.getOperation().getLegalEntityName(), LEGAL_ENTITY_NAME);
-    /*assertEquals(dto.getRepresentative().getFullName(), REP_LAST_NAME + " " + REP_FIRST_NAME + " "
-        + REP_PATRONYMIC);*/
+    assertEquals(dto.getOperation().getId(), OPERATION_ID);
+    assertEquals(dto.getOperation().getTypeCode(), OperationTypeCode.TO_CARD_DEPOSIT.code());;
+    assertEquals(dto.getOperation().getTypeName(), OperationTypeCode.TO_CARD_DEPOSIT.value());
+    assertEquals(dto.getOperation().getCreatedDate(), OPERATION_DATE);
+    // FIXME assertEquals(dto.getOperation().getInn(), OPERATION_INN);
+    //       assertEquals(dto.getOperation().getLegalEntityName(), LEGAL_ENTITY_NAME);
+    assertEquals(dto.getRepresentative().getFullName(), REP_LAST_NAME + " "
+        + REP_FIRST_NAME + " " + REP_PATRONYMIC);
     assertEquals(dto.getRepresentative().getLastName(), REP_LAST_NAME);
     assertEquals(dto.getRepresentative().getFirstName(), REP_FIRST_NAME);
     assertEquals(dto.getRepresentative().getPatronymic(), REP_PATRONYMIC);
@@ -124,23 +128,10 @@ public class OperationJournalMapperImplTest {
     assertEquals(dto.getRepresentative().getAddress(), REP_ADDRESS);
     assertEquals(dto.getRepresentative().getInn(), REP_INN);
     assertEquals(dto.getRepresentative().isResident(), REP_RESIDENT);
-    //assertEquals(dto.getOperation().getAmount(), String.valueOf(OPERATION_AMOUNT));
+    assertEquals(dto.getOperation().getAmount(), String.valueOf(OPERATION_AMOUNT));
     assertEquals(dto.getCommission(), String.valueOf(COMMISSION_AMOUNT));
-    //assertEquals(dto.getOperation().getStatus(), OPERATION_STATUS);
-    //assertNull(dto.getOperation().getRollbackReason());
-  }
-
-  private OperationTaskCardDeposit getOperationTaskCardDeposit() throws Exception {
-    OperationTaskCardDeposit entity = new OperationTaskCardDeposit();
-
-    entity.setId(OPERATION_ID);
-    entity.setStatus(OperationTaskStatus.COMPLETED);
-    entity.setStatusChangedDate(longDateFormat.parse(OPERATION_DATE));
-    entity.setInn(OPERATION_INN);
-    entity.setLegalEntityShortName(LEGAL_ENTITY_NAME);
-    entity.setAmount(OPERATION_AMOUNT);
-
-    return entity;
+    assertEquals(dto.getOperation().getStatus(), OPERATION_STATUS.value());
+    assertNull(dto.getOperation().getRollbackReason());
   }
 
   private Representative getRepresentative() throws Exception {
@@ -174,5 +165,17 @@ public class OperationJournalMapperImplTest {
     entity.setIssuedDate(shortDateFormat.parse(REP_IDD_ISSUED_DATE));
 
     return entity;
+  }
+
+  private Operation getOperation() throws ParseException {
+    Operation operation = new Operation();
+
+    operation.setId(OPERATION_ID);
+    operation.setCreatedDate(longDateFormat.parse(OPERATION_DATE));
+    operation.setStatus(OPERATION_STATUS);
+    operation.setTypeCode(OperationTypeCode.TO_CARD_DEPOSIT);
+    operation.setAmount(OPERATION_AMOUNT);
+
+    return operation;
   }
 }

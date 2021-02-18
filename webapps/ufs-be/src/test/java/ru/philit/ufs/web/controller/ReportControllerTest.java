@@ -9,9 +9,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -21,13 +24,14 @@ import ru.philit.ufs.model.entity.account.Representative;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
-import ru.philit.ufs.model.entity.oper.OperationTask;
 import ru.philit.ufs.model.entity.oper.OperationTaskCardDeposit;
 import ru.philit.ufs.model.entity.oper.OperationTaskStatus;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.Subbranch;
 import ru.philit.ufs.model.entity.user.User;
+import ru.philit.ufs.model.entity.user.Workplace;
+import ru.philit.ufs.web.dto.OperationDto;
 import ru.philit.ufs.web.dto.OperationJournalDto;
 import ru.philit.ufs.web.mapping.OperationJournalMapper;
 import ru.philit.ufs.web.mapping.impl.OperationJournalMapperImpl;
@@ -71,11 +75,11 @@ public class ReportControllerTest extends RestControllerTest {
     task.setLegalEntityShortName("short name");
     task.setAmount(BigDecimal.valueOf(1400));
     operationPackage.getToCardDeposits().add(task);
-    when(reportProvider.getOperationPackages(any(Date.class), any(Date.class),
-        any(ClientInfo.class))).thenReturn(Collections.singletonList(operationPackage));
     Operation operation = new Operation();
+    operation.setAmount(BigDecimal.valueOf(1400));
     operation.setTypeCode(OperationTypeCode.TO_CARD_DEPOSIT);
-    when(reportProvider.getOperation(any(OperationTask.class))).thenReturn(operation);
+    when(reportProvider.getOperations(any(Date.class), any(Date.class), any(ClientInfo.class)))
+        .thenReturn(Collections.singletonList(operation));
     User sidorovUser = new User("Sidorov_SS");
     sidorovUser.setPosition("оператор");
     when(reportProvider.getUser(anyString()))
@@ -103,12 +107,59 @@ public class ReportControllerTest extends RestControllerTest {
 
     assertNotNull(response.getData());
     assertTrue(response.getData() instanceof List);
-    assertEquals(((List)response.getData()).size(), 1);
-    assertEquals(((List)response.getData()).get(0).getClass(), OperationJournalDto.class);
-    OperationJournalDto controlDto = (OperationJournalDto) ((List)response.getData()).get(0);
+    assertEquals(((List) response.getData()).size(), 1);
+    assertEquals(((List) response.getData()).get(0).getClass(), OperationJournalDto.class);
+    OperationJournalDto controlDto = (OperationJournalDto) ((List) response.getData()).get(0);
     assertNotNull(controlDto.getOperation());
-    //assertEquals(controlDto.getOperation().getAmount(), "1400");
+    assertEquals(controlDto.getOperation().getAmount(), "1400");
     assertNotNull(controlDto.getRepresentative());
-    //assertEquals(controlDto.getRepresentative().getFullName(), "Петров Петр Петрович");
+    assertEquals(controlDto.getRepresentative().getFullName(), "Петров Петр Петрович");
+  }
+
+  @Test
+  public void getTurnoverByOperationJournal() throws Exception {
+    GetOperationJournalReq request = new GetOperationJournalReq();
+    request.setFromDate("30.05.2017");
+    request.setToDate("31.05.2017");
+
+    List<Operation> operationList = new ArrayList<>();
+    int identicalOpsNum = 3;
+    for (OperationTypeCode type : OperationTypeCode.values()) {
+      for (int i = 0; i < identicalOpsNum; i++) {
+        Operation operation = new Operation();
+        operation.setWorkplaceId("workplace" + i);
+        operation.setCurrencyType("RUB");
+        operation.setAmount(BigDecimal.valueOf(type.ordinal()));
+        operation.setTypeCode(type);
+        operationList.add(operation);
+      }
+    }
+    when(reportProvider.getOperations(any(Date.class), any(Date.class), any(ClientInfo.class)))
+        .thenReturn(operationList);
+    Workplace workplace = new Workplace();
+    workplace.setSubbranchCode("subbranch");
+    when(reportProvider.getWorkplace(anyString())).thenReturn(workplace);
+
+    String responseJson = performAndGetContent(post("/report/turnoverByOperationJournal")
+        .content(toRequest(request)));
+    GetOperationJournalResp response = toResponse(responseJson, GetOperationJournalResp.class);
+
+    final List<OperationJournalDto> data = response.getData();
+    assertNotNull(data);
+    assertEquals(data.size(), OperationTypeCode.values().length);
+    assertEquals(data.get(0).getClass(), OperationJournalDto.class);
+
+    Map<OperationTypeCode, OperationDto> operationByTypeMap = new HashMap<>();
+    for (OperationJournalDto journalDto : data) {
+      OperationDto operation = journalDto.getOperation();
+      operationByTypeMap.put(OperationTypeCode.getByCode(operation.getTypeCode()), operation);
+    }
+    for (OperationTypeCode type : OperationTypeCode.values()) {
+      OperationDto operation = operationByTypeMap.get(type);
+      assertNotNull(operation);
+      assertEquals("subbranch", operation.getSubbranchCode());
+      assertEquals("RUB", operation.getCurrencyType());
+      assertEquals(String.valueOf(type.ordinal() * identicalOpsNum), operation.getAmount());
+    }
   }
 }

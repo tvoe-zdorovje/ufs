@@ -1,6 +1,7 @@
 package ru.philit.ufs.model.cache;
 
 import java.util.List;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
@@ -33,4 +34,6 @@ public interface OperationCache {
   Operation commitOperation(Operation operation, ClientInfo clientInfo);
 
   Operation cancelOperation(Operation operation, ClientInfo clientInfo);
+
+  List<Operation> getOperations(GetOperationRequest request, ClientInfo clientInfo);
 }

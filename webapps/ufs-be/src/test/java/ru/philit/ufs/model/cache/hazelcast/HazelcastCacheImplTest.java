@@ -218,6 +218,9 @@ public class HazelcastCacheImplTest {
           case RequestType.ROLLBACK_OPERATION:
             rollbackOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
             break;
+          case RequestType.GET_OPERATION:
+            operationMap.put(key, new ArrayList<Operation>());
+            break;
           default:
         }
         return null;
@@ -256,6 +259,7 @@ public class HazelcastCacheImplTest {
     assertNotNull(cache.cancelOperation(new Operation(), CLIENT_INFO));
     assertNotNull(cache.createOperation("1", OperationTypeCode.TO_CARD_DEPOSIT.code(),
         CLIENT_INFO));
+    assertNotNull(cache.getOperations(new GetOperationRequest(), CLIENT_INFO));
   }
 
   @Test
@@ -299,6 +303,10 @@ public class HazelcastCacheImplTest {
     assertEquals(1, client.getRollbackOperationMap().size());
     assertEquals(operation, client.getRollbackOperationMap().get(localKey).getData());
 
+    assertEquals(0, operationMap.size());
+
+    cache.getOperations(new GetOperationRequest(), CLIENT_INFO);
+    assertEquals(1, operationMap.size());
   }
 
   @Test

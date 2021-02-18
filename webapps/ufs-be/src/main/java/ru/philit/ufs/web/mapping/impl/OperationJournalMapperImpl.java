@@ -89,6 +89,7 @@ public class OperationJournalMapperImpl
     out.setPostcode(in.getPostindex());
     out.setResident(in.isResident());
     out.setDocument(asDocumentDto(in.getIdentityDocuments()));
+    out.setFullName(in.getLastName() + " " + in.getFirstName() + " " + in.getPatronymic());
 
     return out;
   }
@@ -102,13 +103,15 @@ public class OperationJournalMapperImpl
 
     out.setId(in.getId());
     if (in.getTypeCode() != null) {
-      out.setType(in.getTypeCode().value());
+      out.setTypeName(in.getTypeCode().value());
+      out.setTypeCode(in.getTypeCode().code());
     }
     if (in.getStatus() != null) {
       out.setStatus(in.getStatus().value());
     }
     out.setCreatedDate(asLongDateDto(in.getCreatedDate()));
     out.setRollbackReason(in.getRollbackReason());
+    out.setAmount(String.valueOf(in.getAmount()));
 
     return out;
   }

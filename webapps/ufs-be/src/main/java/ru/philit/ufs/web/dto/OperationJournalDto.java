@@ -31,10 +31,6 @@ public class OperationJournalDto implements Serializable {
    */
   private OperationDto operation;
   /**
-   * Взнос наличных.
-   */
-  private CardDepositDto deposit;
-  /**
    * Сумма комиссии.
    */
   private String commission;
@@ -68,14 +64,6 @@ public class OperationJournalDto implements Serializable {
    */
   public OperationJournalDto withOperation(OperationDto operation) {
     setOperation(operation);
-    return this;
-  }
-
-  /**
-   * Добавление информации о взносе наличных.
-   */
-  public OperationJournalDto withDeposit(CardDepositDto deposit) {
-    setDeposit(deposit);
     return this;
   }
 

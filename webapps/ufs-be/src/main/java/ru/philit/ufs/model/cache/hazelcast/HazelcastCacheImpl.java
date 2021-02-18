@@ -12,6 +12,7 @@ import static ru.philit.ufs.model.entity.request.RequestType.COMMIT_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.COUNT_COMMISSION;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.CREATE_OPER_PACKAGE;
+import static ru.philit.ufs.model.entity.request.RequestType.GET_OPERATION;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OPER_TASKS;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN;
 import static ru.philit.ufs.model.entity.request.RequestType.GET_OVN_LIST;
@@ -28,7 +29,6 @@ import com.google.common.collect.Iterables;
 import com.hazelcast.core.IMap;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,10 +51,10 @@ import ru.philit.ufs.model.entity.oper.CashDepositAnnouncement;
 import ru.philit.ufs.model.entity.oper.CashDepositAnnouncementsRequest;
 import ru.philit.ufs.model.entity.oper.CashSymbol;
 import ru.philit.ufs.model.entity.oper.CashSymbolRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
 import ru.philit.ufs.model.entity.oper.OperationPackage;
 import ru.philit.ufs.model.entity.oper.OperationPackageRequest;
-import ru.philit.ufs.model.entity.oper.OperationStatus;
 import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.oper.OperationType;
 import ru.philit.ufs.model.entity.oper.OperationTypeFavourite;
@@ -264,6 +264,12 @@ public class HazelcastCacheImpl
     // error handling...?
     // }
     return response.getData();
+  }
+
+  @Override
+  public List<Operation> getOperations(GetOperationRequest request, ClientInfo clientInfo) {
+    return requestDataFromExternal(
+        request, client.getOperationMap(), GET_OPERATION, clientInfo);
   }
 
   @Override

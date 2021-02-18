@@ -1,11 +1,7 @@
 package ru.philit.ufs.web.provider;
 
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,8 +10,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,19 +25,18 @@ import ru.philit.ufs.model.cache.OperationCache;
 import ru.philit.ufs.model.cache.UserCache;
 import ru.philit.ufs.model.cache.mock.MockCacheImpl;
 import ru.philit.ufs.model.entity.account.AccountOperationRequest;
+import ru.philit.ufs.model.entity.oper.GetOperationRequest;
 import ru.philit.ufs.model.entity.oper.Operation;
-import ru.philit.ufs.model.entity.oper.OperationPackage;
-import ru.philit.ufs.model.entity.oper.OperationTask;
-import ru.philit.ufs.model.entity.oper.OperationTasksRequest;
 import ru.philit.ufs.model.entity.user.ClientInfo;
 import ru.philit.ufs.model.entity.user.Operator;
 import ru.philit.ufs.model.entity.user.User;
-import ru.philit.ufs.web.exception.InvalidDataException;
 
 public class ReportProviderTest {
 
   private static final String LOGIN = "login";
-  private static final ClientInfo CLIENT_INFO = new ClientInfo("1", new User(LOGIN), "2");
+  private static final String SESSION_ID = "1";
+  private static final ClientInfo CLIENT_INFO =
+      new ClientInfo(SESSION_ID, new User(LOGIN), "2");
   private static final Date DATE = new Date();
   private static final String ACCOUNT_ID = "3562212";
   private static final BigDecimal AMOUNT = new BigDecimal("14812.28");
@@ -63,77 +60,32 @@ public class ReportProviderTest {
   }
 
   @Test
-  public void testGetOperationPackages() throws Exception {
-    // given
-    List<OperationPackage> packagesFromCache = singletonList(new OperationPackage());
-
+  public void testGetOperations() throws Exception {
     // when
-    when(operationCache.getTasksInPackages(any(OperationTasksRequest.class), any(ClientInfo.class)))
-        .thenReturn(packagesFromCache);
-    List<OperationPackage> packages = provider.getOperationPackages(DATE, DATE, CLIENT_INFO);
-
+    when(operationCache.getOperations(any(GetOperationRequest.class), any(ClientInfo.class)))
+        .thenReturn(Collections.singletonList(new Operation()));
+    final List<Operation> operations = provider.getOperations(DATE, DATE, CLIENT_INFO);
     // then
-    assertNotNull(packages);
+    Assert.assertFalse(operations.isEmpty());
 
     // verify
-    verify(operationCache, times(2))
-        .getTasksInPackages(any(OperationTasksRequest.class), any(ClientInfo.class));
+    verify(operationCache, times(1))
+        .getOperations(any(GetOperationRequest.class), any(ClientInfo.class));
     verifyNoMoreInteractions(operationCache);
-  }
-
-  @Test(expected = InvalidDataException.class)
-  public void testGetOperationPackages_NullDateFrom() throws Exception {
-    // when
-    provider.getOperationPackages(null, DATE, CLIENT_INFO);
-  }
-
-  @Test(expected = InvalidDataException.class)
-  public void testGetOperationPackages_NullDateTo() throws Exception {
-    // when
-    provider.getOperationPackages(DATE, null, CLIENT_INFO);
-  }
-
-  @Test
-  public void testGetOperationPackages_NullFromCache() throws Exception {
-    // when
-    when(operationCache.getTasksInPackages(any(OperationTasksRequest.class), any(ClientInfo.class)))
-        .thenReturn(null);
-    List<OperationPackage> packages = provider.getOperationPackages(DATE, DATE, CLIENT_INFO);
-
-    // then
-    assertNotNull(packages);
-    assertTrue(packages.isEmpty());
-
-    // verify
-    verify(operationCache, times(2))
-        .getTasksInPackages(any(OperationTasksRequest.class), any(ClientInfo.class));
-    verifyNoMoreInteractions(operationCache);
-  }
-
-  @Test
-  public void testGetOperation() throws Exception {
-    // given
-    OperationTask task = new OperationTask();
-
-    // when
-    when(operationCache.getOperation(anyLong())).thenReturn(new Operation());
-    provider.getOperation(task);
-
-    // verify
-    verify(operationCache, times(1)).getOperation(anyLong());
-    verifyNoMoreInteractions(operationCache);
-  }
-
-  @Test(expected = InvalidDataException.class)
-  public void testGetOperation_NullTask() throws Exception {
-    // when
-    provider.getOperation(null);
   }
 
   @Test
   public void testGetUser() throws Exception {
     // when
-    provider.getUser(LOGIN);
+    when(userCache.getUser(anyString())).thenReturn(new User());
+    final User user = provider.getUser(SESSION_ID);
+    // then
+    Assert.assertNotNull(user);
+
+    // verify
+    verify(userCache, times(1))
+        .getUser(anyString());
+    verifyNoMoreInteractions(operationCache);
   }
 
   @Test

@@ -21,17 +21,33 @@ public class OperationDto implements Serializable {
    */
   private String id;
   /**
-   * Тип операции.
+   * Название типа операции.
    */
-  private String type;
+  private String typeName;
+  /**
+   * Код типа операции.
+   */
+  private String typeCode;
   /**
    * Статус.
    */
   private String status;
   /**
+   * Сумма операции.
+   */
+  private String amount;
+  /**
+   * Валюта операции.
+   */
+  private String currencyType;
+  /**
    * Идентификатор рабочего места.
    */
   private String workplaceId;
+  /**
+   * Код отделения.
+   */
+  private String subbranchCode;
   /**
    * Дата создания.
    */
