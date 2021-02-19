@@ -104,8 +104,6 @@ public class OperationsCacheServiceTest {
 
     // test invalid
 
-    testCreateOperationInvalid();
-
     testUpdOperationInvalid();
 
     testCommitOperationInvalid();
@@ -396,22 +394,6 @@ public class OperationsCacheServiceTest {
   }
 
   // === TEST INVALID ===
-
-  private void testCreateOperationInvalid() throws JAXBException {
-    String request1 =
-        "<SrvCreateOperationRq><HeaderInfo/><SrvCreateOperationRqMessage><operationType/>"
-            + "<workPlace_UId>workplace1</workPlace_UId><operatorId>operator1</operatorId>"
-            + "</SrvCreateOperationRqMessage></SrvCreateOperationRq>";
-
-    Assert.assertTrue(service.processMessage(request1));
-    Assert.assertNotNull(sentMessage);
-
-    Object responseObj = jaxbConverter.getObject(sentMessage);
-    Assert.assertEquals(SrvCreateOperationRs.class, responseObj.getClass());
-    SrvCreateOperationRsMessage rsMsg = ((SrvCreateOperationRs) responseObj)
-        .getSrvCreateOperationRsMessage();
-    Assert.assertEquals("err", rsMsg.getResponseCode());
-  }
 
   private void testUpdOperationInvalid() throws JAXBException {
     String operationId = "non-existent";

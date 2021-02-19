@@ -107,16 +107,10 @@ public class ResponseListenerTest {
   private final IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap =
       new MockIMap<>();
 
-  private final IMap<LocalKey<String>, ExternalEntityContainer<Operation>> commitOperationByIdMap =
-      new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> commitOperationMap =
-      new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap =
-      new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> rollbackOperationMap =
-      new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap =
-      new MockIMap<>();
+  private final IMap<LocalKey<Operation>, Operation> commitOperationMap = new MockIMap<>();
+  private final IMap<LocalKey<Operation>, Operation> createOperationMap = new MockIMap<>();
+  private final IMap<LocalKey<Operation>, Operation> rollbackOperationMap = new MockIMap<>();
+  private final IMap<LocalKey<Operation>, Operation> updOperationMap = new MockIMap<>();
   private final IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap =
       new MockIMap<>();
 
@@ -163,7 +157,6 @@ public class ResponseListenerTest {
     when(hazelcastServer.getRepresentativeByCardMap()).thenReturn(representativeByCardMap);
     when(hazelcastServer.getOperatorByUserMap()).thenReturn(operatorByUserMap);
     when(hazelcastServer.getCashSymbolsMap()).thenReturn(cashSymbolsMap);
-    when(hazelcastServer.getCommitOperationByIdMap()).thenReturn(commitOperationByIdMap);
     when(hazelcastServer.getCommitOperationMap()).thenReturn(commitOperationMap);
     when(hazelcastServer.getCreateOperationMap()).thenReturn(createOperationMap);
     when(hazelcastServer.getRollbackOperationMap()).thenReturn(rollbackOperationMap);
@@ -1235,54 +1228,6 @@ public class ResponseListenerTest {
   }
 
   @Test
-  public void testItemAdded_CommitOperationById() throws Exception {
-    // given
-    ExternalEntityRequest request = new ExternalEntityRequest();
-    request.setSessionId(SESSION_ID);
-    request.setEntityType(RequestType.COMMIT_OPERATION_BY_ID);
-    request.setRequestData(OPERATION_ID);
-    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
-    response.setRequestUid(FIX_UUID);
-    response.setReceiveDate(new Date());
-    response.setResponseCode("ok");
-    Operation operation = new Operation();
-    operation.setRequestUid(FIX_UUID);
-    operation.setReceiveDate(new Date());
-    operation.setId(OPERATION_ID);
-    operation.setStatus(OperationStatus.COMMITTED);
-    operation.setCommittedDate(new Date());
-    response.setData(operation);
-    // when
-    requestMap.put(FIX_UUID, request);
-    responseQueue.add(response);
-    // then
-    Assert.assertTrue(responseFlagMap.containsKey(request));
-    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, OPERATION_ID);
-    Assert.assertTrue(commitOperationByIdMap.containsKey(localKey));
-    Assert.assertEquals(commitOperationByIdMap.get(localKey), response);
-  }
-
-  @Test
-  public void testItemAdded_CommitOperationById_Bad() throws Exception {
-    // given
-    ExternalEntityRequest request = new ExternalEntityRequest();
-    request.setSessionId(SESSION_ID);
-    request.setEntityType(RequestType.COMMIT_OPERATION_BY_ID);
-    request.setRequestData(OPERATION_ID);
-    Operation operation = new Operation();
-    operation.setRequestUid(FIX_UUID);
-    operation.setReceiveDate(new Date());
-
-    // when
-    requestMap.put(FIX_UUID, request);
-    responseQueue.add(operation);
-    // then
-    Assert.assertTrue(responseFlagMap.containsKey(request));
-    LocalKey<String> localKey = new LocalKey<>(SESSION_ID, OPERATION_ID);
-    Assert.assertFalse(commitOperationByIdMap.containsKey(localKey));
-  }
-
-  @Test
   public void testItemAdded_CommitOperation() throws Exception {
     // given
     Operation reqOperation = new Operation();
@@ -1292,17 +1237,12 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.COMMIT_OPERATION);
     request.setRequestData(reqOperation);
 
-    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    Operation response = new Operation();
+    response.setId(OPERATION_ID);
     response.setRequestUid(FIX_UUID);
     response.setReceiveDate(new Date());
-    response.setResponseCode("ok");
-    Operation respOperation = new Operation();
-    respOperation.setId(OPERATION_ID);
-    respOperation.setRequestUid(FIX_UUID);
-    respOperation.setReceiveDate(new Date());
-    respOperation.setStatus(OperationStatus.COMMITTED);
-    respOperation.setCommittedDate(new Date());
-    response.setData(respOperation);
+    response.setStatus(OperationStatus.COMMITTED);
+    response.setCommittedDate(new Date());
     // when
     requestMap.put(FIX_UUID, request);
     responseQueue.add(response);
@@ -1323,12 +1263,9 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.COMMIT_OPERATION);
     request.setRequestData(reqOperation);
 
-    Operation respOperation = new Operation();
-    respOperation.setId(OPERATION_ID);
+    ExternalEntity respOperation = new ExternalEntity();
     respOperation.setRequestUid(FIX_UUID);
     respOperation.setReceiveDate(new Date());
-    respOperation.setStatus(OperationStatus.COMMITTED);
-    respOperation.setCommittedDate(new Date());
     // when
     requestMap.put(FIX_UUID, request);
     responseQueue.add(respOperation);
@@ -1347,12 +1284,10 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.CREATE_OPERATION);
     request.setRequestData(reqOperation);
 
-    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
-    response.setRequestUid(FIX_UUID);
-    response.setReceiveDate(new Date());
+    Operation response = new Operation();
     response.setResponseCode("ok");
-    Operation respOperation = new Operation();
-    response.setData(respOperation);
+    response.setReceiveDate(new Date());
+    response.setRequestUid(FIX_UUID);
     // when
     requestMap.put(FIX_UUID, request);
     responseQueue.add(response);
@@ -1372,7 +1307,7 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.COMMIT_OPERATION);
     request.setRequestData(reqOperation);
 
-    Operation respOperation = new Operation();
+    ExternalEntity respOperation = new ExternalEntity();
     respOperation.setRequestUid(FIX_UUID);
     respOperation.setReceiveDate(new Date());
 
@@ -1394,12 +1329,10 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.UPDATE_OPERATION);
     request.setRequestData(reqOperation);
 
-    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    Operation response = new Operation();
     response.setRequestUid(FIX_UUID);
     response.setReceiveDate(new Date());
     response.setResponseCode("ok");
-    Operation respOperation = new Operation();
-    response.setData(respOperation);
     // when
     requestMap.put(FIX_UUID, request);
     responseQueue.add(response);
@@ -1419,7 +1352,7 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.UPDATE_OPERATION);
     request.setRequestData(reqOperation);
 
-    Operation respOperation = new Operation();
+    ExternalEntity respOperation = new ExternalEntity();
     respOperation.setRequestUid(FIX_UUID);
     respOperation.setReceiveDate(new Date());
 
@@ -1441,12 +1374,10 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.ROLLBACK_OPERATION);
     request.setRequestData(reqOperation);
 
-    ExternalEntityContainer<Operation> response = new ExternalEntityContainer<>();
+    Operation response = new Operation();
     response.setRequestUid(FIX_UUID);
     response.setReceiveDate(new Date());
     response.setResponseCode("ok");
-    Operation respOperation = new Operation();
-    response.setData(respOperation);
     // when
     requestMap.put(FIX_UUID, request);
     responseQueue.add(response);
@@ -1466,7 +1397,7 @@ public class ResponseListenerTest {
     request.setEntityType(RequestType.ROLLBACK_OPERATION);
     request.setRequestData(reqOperation);
 
-    Operation respOperation = new Operation();
+    ExternalEntity respOperation = new ExternalEntity();
     respOperation.setRequestUid(FIX_UUID);
     respOperation.setReceiveDate(new Date());
 

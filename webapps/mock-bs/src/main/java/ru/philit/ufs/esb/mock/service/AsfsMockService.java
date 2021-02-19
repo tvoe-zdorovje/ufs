@@ -140,12 +140,6 @@ public class AsfsMockService extends CommonMockService implements MessageProcess
       return response;
     }
 
-    if (rqMsg.getOperationType() == null || rqMsg.getOperatorId() == null) {
-      rsMessage.setResponseCode("err");
-      logger.warn("Request message is invalid: {}", rqMsg);
-      return response;
-    }
-
     OperationItem item = new OperationItem();
     item.setOperatorId(rqMsg.getOperatorId());
     item.setWorkPlaceUId(rqMsg.getWorkPlaceUId());

@@ -42,5 +42,5 @@ public class Operation extends ExternalEntity {
   private String recipientAccountCurrencyType;
   private String recipientBank;
   private String recipientBankBic;
-
+  private String responseCode;
 }

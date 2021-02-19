@@ -296,48 +296,35 @@ public class ResponseListener
         }
         break;
 
-      case RequestType.COMMIT_OPERATION_BY_ID:
-        if (entity instanceof ExternalEntityContainer
-            && (elementClass1 == null || elementClass1 == Operation.class)) {
-          hazelcastServer.getCommitOperationByIdMap().put(
-              new LocalKey<>(request.getSessionId(), (String) request.getRequestData()),
-              (ExternalEntityContainer<Operation>) entity);
-        }
-        break;
-
       case RequestType.COMMIT_OPERATION:
-        if (entity instanceof ExternalEntityContainer
-            && (elementClass1 == null || elementClass1 == Operation.class)) {
+        if (entity instanceof Operation) {
           hazelcastServer.getCommitOperationMap().put(
               new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
-              (ExternalEntityContainer<Operation>) entity);
+              (Operation) entity);
         }
         break;
 
       case RequestType.CREATE_OPERATION:
-        if (entity instanceof ExternalEntityContainer
-            && (elementClass1 == null || elementClass1 == Operation.class)) {
+        if (entity instanceof Operation) {
           hazelcastServer.getCreateOperationMap().put(
               new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
-              (ExternalEntityContainer<Operation>) entity);
+              (Operation) entity);
         }
         break;
 
       case RequestType.ROLLBACK_OPERATION:
-        if (entity instanceof ExternalEntityContainer
-            && (elementClass1 == null || elementClass1 == Operation.class)) {
+        if (entity instanceof Operation) {
           hazelcastServer.getRollbackOperationMap().put(
               new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
-              (ExternalEntityContainer<Operation>) entity);
+              (Operation) entity);
         }
         break;
 
       case RequestType.UPDATE_OPERATION:
-        if (entity instanceof ExternalEntityContainer
-            && (elementClass1 == null || elementClass1 == Operation.class)) {
+        if (entity instanceof Operation) {
           hazelcastServer.getUpdOperationMap().put(
               new LocalKey<>(request.getSessionId(), (Operation) request.getRequestData()),
-              (ExternalEntityContainer<Operation>) entity);
+              (Operation) entity);
         }
         break;
 

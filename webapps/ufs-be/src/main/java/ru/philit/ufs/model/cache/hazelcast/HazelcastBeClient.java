@@ -146,15 +146,13 @@ public class HazelcastBeClient {
   private IMap<LocalKey<String>, Operator> operatorByUserMap;
 
   @Getter
-  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
-      commitOperationMap;
+  private IMap<LocalKey<Operation>, Operation> commitOperationMap;
   @Getter
-  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap;
+  private IMap<LocalKey<Operation>, Operation> createOperationMap;
   @Getter
-  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
-      rollbackOperationMap;
+  private IMap<LocalKey<Operation>, Operation> rollbackOperationMap;
   @Getter
-  private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap;
+  private IMap<LocalKey<Operation>, Operation> updOperationMap;
   @Getter
   private IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap;
 

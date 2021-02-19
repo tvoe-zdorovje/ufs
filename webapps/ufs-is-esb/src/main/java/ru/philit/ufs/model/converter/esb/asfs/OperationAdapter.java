@@ -59,50 +59,30 @@ public class OperationAdapter extends AsfsAdapter {
 
   //******** Mappers *******
 
-  private static void map(SrvCommitOperationRsMessage message,
-      ExternalEntityContainer<Operation> container) {
-    container.setResponseCode(message.getResponseCode());
-    map(message, container.getData());
-  }
-
   private static void map(SrvCommitOperationRsMessage message, Operation operation) {
     operation.setId(message.getOperationId());
     operation.setStatus(operationStatus(message.getOperationStatus()));
     operation.setCommittedDate(date(message.getCommittedDttm()));
-  }
-
-  private static void map(SrvCreateOperationRsMessage message,
-      ExternalEntityContainer<Operation> container) {
-    container.setResponseCode(message.getResponseCode());
-    map(message, container.getData());
+    operation.setResponseCode(message.getResponseCode());
   }
 
   private static void map(SrvCreateOperationRsMessage message, Operation operation) {
     operation.setId(message.getOperationId());
     operation.setStatus(operationStatus(message.getOperationStatus()));
     operation.setCreatedDate(date(message.getCreatedDttm()));
-  }
-
-  private static void map(SrvRollbackOperationRsMessage message,
-      ExternalEntityContainer<Operation> container) {
-    container.setResponseCode(message.getResponseCode());
-    map(message, container.getData());
+    operation.setResponseCode(message.getResponseCode());
   }
 
   private static void map(SrvRollbackOperationRsMessage message, Operation operation) {
     operation.setId(message.getOperationId());
     operation.setStatus(operationStatus(message.getOperationStatus()));
-  }
-
-  private static void map(SrvUpdOperationRsMessage message,
-      ExternalEntityContainer<Operation> container) {
-    container.setResponseCode(message.getResponseCode());
-    map(message, container.getData());
+    operation.setResponseCode(message.getResponseCode());
   }
 
   private static void map(SrvUpdOperationRsMessage message, Operation operation) {
     operation.setId(message.getOperationId());
     operation.setStatus(operationStatus(message.getOperationStatus()));
+    operation.setResponseCode(message.getResponseCode());
   }
 
   private static void map(SrvGetOperationRsMessage.OperationItem message, Operation operation) {
@@ -229,49 +209,41 @@ public class OperationAdapter extends AsfsAdapter {
   /**
    * Преобразует транспортный объект ответа во внутреннюю сущность.
    */
-  public static ExternalEntityContainer<Operation> convert(SrvCommitOperationRs response) {
-    final ExternalEntityContainer<Operation> container =
-        new ExternalEntityContainer<>(new Operation());
-    map(response.getHeaderInfo(), container);
-    map(response.getHeaderInfo(), container.getData());
-    map(response.getSrvCommitOperationRsMessage(), container);
-    return container;
+  public static Operation convert(SrvCommitOperationRs response) {
+    final Operation operation = new Operation();
+    map(response.getHeaderInfo(), operation);
+    map(response.getSrvCommitOperationRsMessage(), operation);
+    return operation;
   }
 
   /**
    * Преобразует транспортный объект ответа во внутреннюю сущность.
    */
-  public static ExternalEntityContainer<Operation> convert(SrvCreateOperationRs response) {
-    final ExternalEntityContainer<Operation> container =
-        new ExternalEntityContainer<>(new Operation());
-    map(response.getHeaderInfo(), container);
-    map(response.getHeaderInfo(), container.getData());
-    map(response.getSrvCreateOperationRsMessage(), container);
-    return container;
+  public static Operation convert(SrvCreateOperationRs response) {
+    final Operation operation = new Operation();
+    map(response.getHeaderInfo(), operation);
+    map(response.getSrvCreateOperationRsMessage(), operation);
+    return operation;
   }
 
   /**
    * Преобразует транспортный объект ответа во внутреннюю сущность.
    */
-  public static ExternalEntityContainer<Operation> convert(SrvRollbackOperationRs response) {
-    final ExternalEntityContainer<Operation> container =
-        new ExternalEntityContainer<>(new Operation());
-    map(response.getHeaderInfo(), container);
-    map(response.getHeaderInfo(), container.getData());
-    map(response.getSrvRollbackOperationRsMessage(), container);
-    return container;
+  public static Operation convert(SrvRollbackOperationRs response) {
+    final Operation operation = new Operation();
+    map(response.getHeaderInfo(), operation);
+    map(response.getSrvRollbackOperationRsMessage(), operation);
+    return operation;
   }
 
   /**
    * Преобразует транспортный объект ответа во внутреннюю сущность.
    */
-  public static ExternalEntityContainer<Operation> convert(SrvUpdOperationRs response) {
-    final ExternalEntityContainer<Operation> container =
-        new ExternalEntityContainer<>(new Operation());
-    map(response.getHeaderInfo(), container);
-    map(response.getHeaderInfo(), container.getData());
-    map(response.getSrvUpdOperationRsMessage(), container);
-    return container;
+  public static Operation convert(SrvUpdOperationRs response) {
+    final Operation operation = new Operation();
+    map(response.getHeaderInfo(), operation);
+    map(response.getSrvUpdOperationRsMessage(), operation);
+    return operation;
   }
 
   /**

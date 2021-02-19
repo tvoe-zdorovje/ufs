@@ -241,29 +241,19 @@ public class HazelcastCacheImpl
     operation.setWorkplaceId(workplaceId);
     operation.setOperatorId(operationTypeCode);
     return requestDataFromExternal(operation, client.getCreateOperationMap(), CREATE_OPERATION,
-        clientInfo).getData();
+        clientInfo);
   }
 
   @Override
   public Operation commitOperation(Operation operation, ClientInfo clientInfo) {
-    final ExternalEntityContainer<Operation> response =
-        requestDataFromExternal(
-            operation, client.getCommitOperationMap(), COMMIT_OPERATION, clientInfo);
-    // if (!response.getResponseCode().equals("ok")) {
-    // error handling...?
-    // }
-    return response.getData();
+    return requestDataFromExternal(
+        operation, client.getCommitOperationMap(), COMMIT_OPERATION, clientInfo);
   }
 
   @Override
   public Operation cancelOperation(Operation operation, ClientInfo clientInfo) {
-    final ExternalEntityContainer<Operation> response =
-        requestDataFromExternal(
-            operation, client.getRollbackOperationMap(), ROLLBACK_OPERATION, clientInfo);
-    // if (!response.getResponseCode().equals("ok")) {
-    // error handling...?
-    // }
-    return response.getData();
+    return requestDataFromExternal(
+        operation, client.getRollbackOperationMap(), ROLLBACK_OPERATION, clientInfo);
   }
 
   @Override

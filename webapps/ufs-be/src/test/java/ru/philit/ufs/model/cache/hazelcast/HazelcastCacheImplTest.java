@@ -98,14 +98,13 @@ public class HazelcastCacheImplTest {
       new MockIMap<>();
   private final IMap<LocalKey<String>, Operator> operatorByUserMap = new MockIMap<>();
 
-
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> commitOperationMap =
+  private final IMap<LocalKey<Operation>, Operation> commitOperationMap =
       new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap =
+  private final IMap<LocalKey<Operation>, Operation> createOperationMap =
       new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> rollbackOperationMap =
+  private final IMap<LocalKey<Operation>, Operation> rollbackOperationMap =
       new MockIMap<>();
-  private final IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap =
+  private final IMap<LocalKey<Operation>, Operation> updOperationMap =
       new MockIMap<>();
   private final IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap =
       new MockIMap<>();
@@ -210,13 +209,13 @@ public class HazelcastCacheImplTest {
             operatorByUserMap.put(key, new Operator());
             break;
           case RequestType.COMMIT_OPERATION:
-            commitOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            commitOperationMap.put(key, new Operation());
             break;
           case RequestType.CREATE_OPERATION:
-            createOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            createOperationMap.put(key, new Operation());
             break;
           case RequestType.ROLLBACK_OPERATION:
-            rollbackOperationMap.put(key, new ExternalEntityContainer<>(new Operation()));
+            rollbackOperationMap.put(key, new Operation());
             break;
           case RequestType.GET_OPERATION:
             operationMap.put(key, new ArrayList<Operation>());
@@ -289,19 +288,19 @@ public class HazelcastCacheImplTest {
     assertEquals(1, client.getCreateOperationMap().size());
 
     LocalKey<Operation> localKey = new LocalKey<>(SESSION_ID, operation);
-    assertEquals(operation, client.getCreateOperationMap().get(localKey).getData());
+    assertEquals(operation, client.getCreateOperationMap().get(localKey));
 
     assertEquals(0, client.getCommitOperationMap().size());
 
     cache.commitOperation(operation, CLIENT_INFO);
     assertEquals(1, client.getCommitOperationMap().size());
-    assertEquals(operation, client.getCommitOperationMap().get(localKey).getData());
+    assertEquals(operation, client.getCommitOperationMap().get(localKey));
 
     assertEquals(0, client.getRollbackOperationMap().size());
 
     cache.cancelOperation(operation, CLIENT_INFO);
     assertEquals(1, client.getRollbackOperationMap().size());
-    assertEquals(operation, client.getRollbackOperationMap().get(localKey).getData());
+    assertEquals(operation, client.getRollbackOperationMap().get(localKey));
 
     assertEquals(0, operationMap.size());
 

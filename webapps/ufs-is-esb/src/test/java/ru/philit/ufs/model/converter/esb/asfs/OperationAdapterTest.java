@@ -164,8 +164,8 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
       operationItem.setAmount(AMOUNT.add(BigDecimal.valueOf(i)));
       operationItem.setRecipientAccountId(RECIPIENT_ACCOUNT_ID.concat(postfix));
       operationItem.setRecipientAccountTypeId(RECIPIENT_ACCOUNT_TYPE_ID);
-      operationItem
-          .setRecipientAccountCurrencyType(RECIPIENT_ACCOUNT_CURRENCY_TYPE.concat(postfix));
+      operationItem.setRecipientAccountCurrencyType(RECIPIENT_ACCOUNT_CURRENCY_TYPE
+          .concat(postfix));
       operationItem.setRecipientBank(RECIPIENT_BANK.concat(postfix));
       operationItem.setRecipientBankBIC(RECIPIENT_BANK_BIC.concat(postfix));
       operationItem.setCurrencyType(CURRENCY_TYPE.concat(postfix));
@@ -297,29 +297,28 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
 
   @Test
   public void testConvertSrvCommitOperationRs() {
-    final ExternalEntityContainer<Operation> container = OperationAdapter.convert(responseCommitOp);
-    assertContainerBase(container);
-    Assert.assertEquals(COMMITED_DATE, container.getData().getCommittedDate());
+    final Operation operation = OperationAdapter.convert(responseCommitOp);
+    assertOperationBase(operation);
+    Assert.assertEquals(COMMITED_DATE, operation.getCommittedDate());
   }
 
   @Test
   public void testConvertSrvCreateOperationRs() {
-    final ExternalEntityContainer<Operation> container = OperationAdapter.convert(responseCreateOp);
-    assertContainerBase(container);
-    Assert.assertEquals(CREATED_DATE, container.getData().getCreatedDate());
+    final Operation operation = OperationAdapter.convert(responseCreateOp);
+    assertOperationBase(operation);
+    Assert.assertEquals(CREATED_DATE, operation.getCreatedDate());
   }
 
   @Test
   public void testConvertSrvRollbackOperationRs() {
-    final ExternalEntityContainer<Operation> container = OperationAdapter
-        .convert(responseRollbackOp);
-    assertContainerBase(container);
+    final Operation operation = OperationAdapter.convert(responseRollbackOp);
+    assertOperationBase(operation);
   }
 
   @Test
   public void testConvertSrvUpdOperationRs() {
-    final ExternalEntityContainer<Operation> container = OperationAdapter.convert(responseUpdOp);
-    assertContainerBase(container);
+    final Operation operation = OperationAdapter.convert(responseUpdOp);
+    assertOperationBase(operation);
   }
 
   @Test
@@ -366,12 +365,11 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
     }
   }
 
-  private void assertContainerBase(ExternalEntityContainer<Operation> container) {
-    assertHeaderInfo(container, FIX_UUID);
-    Assert.assertEquals(RESPONSE_CODE, container.getResponseCode());
-    assertHeaderInfo(container.getData(), FIX_UUID);
-    Assert.assertEquals(OPERATION_ID, container.getData().getId());
-    Assert.assertEquals(OPERATION_STATUS_CODE, container.getData().getStatus().code());
+  private void assertOperationBase(Operation operation) {
+    assertHeaderInfo(operation, FIX_UUID);
+    Assert.assertEquals(RESPONSE_CODE, operation.getResponseCode());
+    Assert.assertEquals(OPERATION_ID, operation.getId());
+    Assert.assertEquals(OPERATION_STATUS_CODE, operation.getStatus().code());
   }
 
   @Test
@@ -379,34 +377,22 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
     // commit
     ExternalEntity commitOpExternalEntity = MultiAdapter.convert(responseCommitOp);
     Assert.assertNotNull(commitOpExternalEntity);
-    Assert.assertEquals(ExternalEntityContainer.class, commitOpExternalEntity.getClass());
-    Assert.assertNotNull(((ExternalEntityContainer) commitOpExternalEntity).getData());
-    Assert.assertEquals(Operation.class,
-        ((ExternalEntityContainer) commitOpExternalEntity).getData().getClass());
+    Assert.assertEquals(Operation.class, commitOpExternalEntity.getClass());
 
     // create
     ExternalEntity createOpExternalEntity = MultiAdapter.convert(responseCreateOp);
     Assert.assertNotNull(createOpExternalEntity);
-    Assert.assertEquals(ExternalEntityContainer.class, createOpExternalEntity.getClass());
-    Assert.assertNotNull(((ExternalEntityContainer) createOpExternalEntity).getData());
-    Assert.assertEquals(Operation.class,
-        ((ExternalEntityContainer) createOpExternalEntity).getData().getClass());
+    Assert.assertEquals(Operation.class, createOpExternalEntity.getClass());
 
     // rollback
     ExternalEntity rollbackOpExternalEntity = MultiAdapter.convert(responseRollbackOp);
     Assert.assertNotNull(rollbackOpExternalEntity);
-    Assert.assertEquals(ExternalEntityContainer.class, rollbackOpExternalEntity.getClass());
-    Assert.assertNotNull(((ExternalEntityContainer) rollbackOpExternalEntity).getData());
-    Assert.assertEquals(Operation.class,
-        ((ExternalEntityContainer) rollbackOpExternalEntity).getData().getClass());
+    Assert.assertEquals(Operation.class, rollbackOpExternalEntity.getClass());
 
     // upd
     ExternalEntity updOpExternalEntity = MultiAdapter.convert(responseUpdOp);
     Assert.assertNotNull(updOpExternalEntity);
-    Assert.assertEquals(ExternalEntityContainer.class, updOpExternalEntity.getClass());
-    Assert.assertNotNull(((ExternalEntityContainer) updOpExternalEntity).getData());
-    Assert.assertEquals(Operation.class,
-        ((ExternalEntityContainer) updOpExternalEntity).getData().getClass());
+    Assert.assertEquals(Operation.class, updOpExternalEntity.getClass());
 
     // get
     ExternalEntity getOpExternalEntity = MultiAdapter.convert(responseGetOp);

@@ -336,15 +336,9 @@ public class EsbServiceImpl
           break;
 
         case RequestType.COMMIT_OPERATION:
-          SrvCommitOperationRq commitRequest = null;
           if (isOperation(entityRequest)) {
-            commitRequest = OperationAdapter
-                .requestCommitOperation((Operation) entityRequest.getRequestData());
-          } else if (isRequestDataString(entityRequest)) {
-            commitRequest = OperationAdapter
-                .requestCommitOperation((String) entityRequest.getRequestData());
-          }
-          if (commitRequest != null) {
+            SrvCommitOperationRq commitRequest =
+                OperationAdapter.requestCommitOperation((Operation) entityRequest.getRequestData());
             isEsbCache.putRequest(commitRequest.getHeaderInfo().getRqUID(), entityRequest);
             esbClient.sendMessage(asfsConverter.getXml(commitRequest));
           }

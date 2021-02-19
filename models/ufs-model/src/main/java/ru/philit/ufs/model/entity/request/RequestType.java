@@ -29,7 +29,6 @@ public class RequestType {
   public static final String OPER_TYPES_BY_ROLE = "OPER_TYPES_BY_ROLE";
   public static final String OPERATOR_BY_USER = "OPERATOR_BY_USER";
   public static final String CASH_SYMBOL = "CASH_SYMBOL";
-  public static final String COMMIT_OPERATION_BY_ID = "COMMIT_OPERATION_BY_ID";
   public static final String COMMIT_OPERATION = "COMMIT_OPERATION";
   public static final String CREATE_OPERATION = "CREATE_OPERATION";
   public static final String ROLLBACK_OPERATION = "ROLLBACK_OPERATION";

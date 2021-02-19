@@ -9,7 +9,6 @@ import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.AUDITED_REQUES
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CASH_SYMBOLS_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMISSION_BY_ACCOUNT_OPERATION_MAP;
-import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMIT_OPERATION_BY_ID_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.COMMIT_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.CREATE_OPERATION_MAP;
 import static ru.philit.ufs.model.cache.hazelcast.CollectionNames.LEGAL_ENTITY_BY_ACCOUNT_MAP;
@@ -180,14 +179,10 @@ public class HazelcastServer {
 
   @Getter private IMap<LocalKey<CashSymbolRequest>, List<CashSymbol>> cashSymbolsMap;
 
-  @Getter private IMap<LocalKey<String>, ExternalEntityContainer<Operation>>
-      commitOperationByIdMap;
-  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
-      commitOperationMap;
-  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> createOperationMap;
-  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>>
-      rollbackOperationMap;
-  @Getter private IMap<LocalKey<Operation>, ExternalEntityContainer<Operation>> updOperationMap;
+  @Getter private IMap<LocalKey<Operation>, Operation> commitOperationMap;
+  @Getter private IMap<LocalKey<Operation>, Operation> createOperationMap;
+  @Getter private IMap<LocalKey<Operation>, Operation> rollbackOperationMap;
+  @Getter private IMap<LocalKey<Operation>, Operation> updOperationMap;
   @Getter private IMap<LocalKey<GetOperationRequest>, List<Operation>> operationMap;
 
   /**
@@ -259,8 +254,8 @@ public class HazelcastServer {
         COMMISSION_BY_ACCOUNT_OPERATION_MAP, CHECK_FRAUD_BY_ACCOUNT_OPERATION_MAP,
         OVN_BY_UID_MAP, OVNS_MAP, ACCOUNT_20202_BY_WORK_PLACE_MAP, OPERATION_TYPES_BY_ROLES_MAP,
         REPRESENTATIVE_MAP, REPRESENTATIVE_BY_CARD_MAP, OPERATOR_BY_USER_MAP, CASH_SYMBOLS_MAP,
-        COMMIT_OPERATION_BY_ID_MAP, CREATE_OPERATION_MAP, ROLLBACK_OPERATION_MAP,
-        UPD_OPERATION_MAP, OPERATION_MAP}) {
+        COMMIT_OPERATION_MAP, CREATE_OPERATION_MAP, ROLLBACK_OPERATION_MAP, UPD_OPERATION_MAP,
+        OPERATION_MAP}) {
       MapConfig mapConfig = new MapConfig();
       mapConfig.setName(mapName);
       mapConfig.setTimeToLiveSeconds(3600);
@@ -308,7 +303,6 @@ public class HazelcastServer {
     operatorByUserMap = instance.getMap(OPERATOR_BY_USER_MAP);
     cashSymbolsMap = instance.getMap(CASH_SYMBOLS_MAP);
 
-    commitOperationByIdMap = instance.getMap(COMMIT_OPERATION_BY_ID_MAP);
     commitOperationMap = instance.getMap(COMMIT_OPERATION_MAP);
     createOperationMap = instance.getMap(CREATE_OPERATION_MAP);
     rollbackOperationMap = instance.getMap(ROLLBACK_OPERATION_MAP);
