@@ -1,7 +1,6 @@
 package ru.philit.ufs.model.converter.esb.asfs;
 
 import ru.philit.ufs.model.entity.account.AccountType;
-import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.OpStatusType;
