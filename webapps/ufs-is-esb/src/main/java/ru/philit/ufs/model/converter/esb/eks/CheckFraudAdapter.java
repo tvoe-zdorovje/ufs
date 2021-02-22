@@ -10,7 +10,7 @@ import ru.philit.ufs.model.entity.esb.eks.SrvCheckWithFraudRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvCheckWithFraudRs.SrvCheckWithFraudRsMessage;
 
 /**
- * Перобразователь данных проверки операции на Fraud с транспортными объектами КСШ.
+ * Преобразователь данных проверки операции на Fraud с транспортными объектами КСШ.
  */
 public class CheckFraudAdapter extends EksAdapter {
 

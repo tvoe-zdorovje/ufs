@@ -45,7 +45,7 @@ public class OperationTypeMapperImplTest {
 
     // then
     assertNotNull(dto);
-    assertEquals(dto.getId(), String.valueOf(ID));
+    assertEquals(dto.getId(), ID);
     assertEquals(dto.getName(), NAME);
     assertEquals(dto.getCode(), CODE.code());
     assertEquals(dto.getCategoryId(), String.valueOf(CATEGORY_ID));

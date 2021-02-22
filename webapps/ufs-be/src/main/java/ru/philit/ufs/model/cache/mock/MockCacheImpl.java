@@ -2,7 +2,6 @@ package ru.philit.ufs.model.cache.mock;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -10,14 +9,10 @@ import ru.philit.ufs.model.cache.MockCache;
 import ru.philit.ufs.model.entity.account.Card;
 import ru.philit.ufs.model.entity.account.CardNetworkCode;
 import ru.philit.ufs.model.entity.account.CardType;
-import ru.philit.ufs.model.entity.common.OperationTypeCode;
-import ru.philit.ufs.model.entity.oper.Operation;
-import ru.philit.ufs.model.entity.oper.OperationStatus;
 import ru.philit.ufs.model.entity.oper.OperationTypeLimit;
 import ru.philit.ufs.model.entity.user.User;
 import ru.philit.ufs.model.entity.user.Workplace;
 import ru.philit.ufs.model.entity.user.WorkplaceType;
-import ru.philit.ufs.util.UuidUtils;
 
 @Service
 public class MockCacheImpl implements MockCache {

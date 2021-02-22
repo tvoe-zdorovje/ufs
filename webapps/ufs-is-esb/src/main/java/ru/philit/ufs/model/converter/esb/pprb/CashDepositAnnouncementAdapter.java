@@ -280,7 +280,7 @@ public class CashDepositAnnouncementAdapter extends PprbAdapter {
   }
 
   /**
-   * Преобразует транспортный объект ответа на редактирвоание ОВН во внутреннюю сущность.
+   * Преобразует транспортный объект ответа на редактирование ОВН во внутреннюю сущность.
    */
   public static CashDepositAnnouncement convert(SrvUpdCashDepAnmntItemRs response) {
     CashDepositAnnouncement ovn = new CashDepositAnnouncement();

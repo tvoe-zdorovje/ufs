@@ -11,7 +11,7 @@ import ru.philit.ufs.model.entity.esb.eks.SrvCountCommissionRs;
 import ru.philit.ufs.model.entity.esb.eks.SrvCountCommissionRs.SrvCountCommissionRsMessage;
 
 /**
- * Перобразователь данных о комиссии с транспортными объектами КСШ.
+ * Преобразователь данных о комиссии с транспортными объектами КСШ.
  */
 public class CommissionAdapter extends EksAdapter {
 

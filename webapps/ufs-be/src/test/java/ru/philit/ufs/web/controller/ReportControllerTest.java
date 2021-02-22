@@ -47,7 +47,7 @@ public class ReportControllerTest extends RestControllerTest {
   @Mock
   private RepresentativeProvider representativeProvider;
   @Spy
-  private OperationJournalMapper operationJournalMapper = new OperationJournalMapperImpl();
+  private final OperationJournalMapper operationJournalMapper = new OperationJournalMapperImpl();
 
   /**
    * Set up test controller.

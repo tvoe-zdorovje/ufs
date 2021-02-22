@@ -1,6 +1,5 @@
 package ru.philit.ufs.model.entity.user;
 
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

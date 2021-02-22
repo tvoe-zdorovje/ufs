@@ -38,8 +38,8 @@ public class AccountAdapter extends EksAdapter {
     return (accountTypeId != null) ? AccountType.getByCode(accountTypeId) : null;
   }
 
-  private static AccountancyType accountancyType(BigInteger acountancyTypeId) {
-    return (acountancyTypeId != null) ? AccountancyType.getByCode(acountancyTypeId.intValue())
+  private static AccountancyType accountancyType(BigInteger accountancyTypeId) {
+    return (accountancyTypeId != null) ? AccountancyType.getByCode(accountancyTypeId.intValue())
         : null;
   }
 

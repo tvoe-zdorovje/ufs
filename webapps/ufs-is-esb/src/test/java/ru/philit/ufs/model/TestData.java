@@ -14,7 +14,7 @@ import ru.philit.ufs.model.entity.esb.eks.SrvAccountByCardNumRs.SrvAccountByCard
 import ru.philit.ufs.model.entity.request.RequestType;
 
 /**
- * Контейнер данных используемых в тестирвоании интеграции.
+ * Контейнер данных используемых в тестировании интеграции.
  */
 public class TestData {
 

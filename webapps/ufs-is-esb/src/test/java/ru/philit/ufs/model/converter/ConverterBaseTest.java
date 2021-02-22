@@ -10,7 +10,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public abstract class ConverterBaseTest {
 
   /**
-   * Возвращает XMLGregorianCalendar для заданных парамтеров даты.
+   * Возвращает XMLGregorianCalendar для заданных параметров даты.
    */
   public static XMLGregorianCalendar xmlCalendar(int year, int month, int day, int hour,
       int minute) {
@@ -25,7 +25,7 @@ public abstract class ConverterBaseTest {
   }
 
   /**
-   * Возвращает Date для заданных парамтеров даты.
+   * Возвращает Date для заданных параметров даты.
    */
   public static Date date(int year, int month, int day, int hour,
       int minute) {

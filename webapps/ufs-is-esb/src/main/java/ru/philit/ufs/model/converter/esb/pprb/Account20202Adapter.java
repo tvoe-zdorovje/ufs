@@ -7,7 +7,7 @@ import ru.philit.ufs.model.entity.esb.pprb.SrvGet20202NumRs;
 import ru.philit.ufs.model.entity.esb.pprb.SrvGet20202NumRs.SrvGet20202NumRsMessage;
 
 /**
- * Перобразователь данных о счёте 20202 с транспортными объектами КСШ.
+ * Преобразователь данных о счёте 20202 с транспортными объектами КСШ.
  */
 public class Account20202Adapter extends PprbAdapter {
 

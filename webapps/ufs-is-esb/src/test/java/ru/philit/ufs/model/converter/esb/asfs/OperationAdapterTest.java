@@ -12,7 +12,6 @@ import ru.philit.ufs.model.converter.ConverterBaseTest;
 import ru.philit.ufs.model.converter.esb.multi.MultiAdapter;
 import ru.philit.ufs.model.entity.account.AccountType;
 import ru.philit.ufs.model.entity.common.ExternalEntity;
-import ru.philit.ufs.model.entity.common.ExternalEntityContainer;
 import ru.philit.ufs.model.entity.common.ExternalEntityList;
 import ru.philit.ufs.model.entity.common.OperationTypeCode;
 import ru.philit.ufs.model.entity.esb.asfs.OpStatusType;
@@ -54,11 +53,11 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
       ConverterBaseTest.xmlCalendar(2021, 1, 15, 3, 34);
   private static final XMLGregorianCalendar CREATED_CALENDAR =
       ConverterBaseTest.xmlCalendar(2021, 1, 12, 13, 11);
-  private static final XMLGregorianCalendar COMMITED_CALENDAR =
+  private static final XMLGregorianCalendar COMMITTED_CALENDAR =
       ConverterBaseTest.xmlCalendar(2021, 1, 12, 14, 22);
   private static final Date CREATED_DATE =
       ConverterBaseTest.date(2021, 1, 12, 13, 11);
-  private static final Date COMMITED_DATE =
+  private static final Date COMMITTED_DATE =
       ConverterBaseTest.date(2021, 1, 12, 14, 22);
   private static final String OPERATION_ID = "88005553535";
   private static final String OPERATION_NUMBER = "2334";
@@ -96,7 +95,7 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
     responseCommitOp.getHeaderInfo().setRqTm(REQ_DATE_TIME);
     final SrvCommitOperationRsMessage commitOpMessage = new SrvCommitOperationRsMessage();
     commitOpMessage.setOperationId(OPERATION_ID);
-    commitOpMessage.setCommittedDttm(COMMITED_CALENDAR);
+    commitOpMessage.setCommittedDttm(COMMITTED_CALENDAR);
     commitOpMessage.setOperationStatus(OpStatusType.fromValue(OPERATION_STATUS_CODE));
     commitOpMessage.setResponseCode(RESPONSE_CODE);
     responseCommitOp.setSrvCommitOperationRsMessage(commitOpMessage);
@@ -155,7 +154,7 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
       operationItem.setOperatorId(OPERATOR_ID.concat(postfix));
       operationItem.setRepId(REP_ID.concat(postfix));                          // vv REMEMBER THIS!!
       operationItem.setCreatedDttm(cloneDateWithMinutes(CREATED_CALENDAR, i % 60)); // ^^
-      operationItem.setCommittedDttm(cloneDateWithMinutes(COMMITED_CALENDAR, (i * 2) % 60));//
+      operationItem.setCommittedDttm(cloneDateWithMinutes(COMMITTED_CALENDAR, (i * 2) % 60));//
       operationItem.setSenderAccountId(SENDER_ACCOUNT_ID.concat(postfix));
       operationItem.setSenderAccountTypeId(SENDER_ACCOUNT_TYPE_ID);
       operationItem.setSenderAccountCurrencyType(SENDER_ACCOUNT_CURRENCY_TYPE.concat(postfix));
@@ -284,7 +283,7 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
     final GetOperationRequest getOperationRequest = new GetOperationRequest();
     getOperationRequest.setId(OPERATION_ID);
     getOperationRequest.setCreatedFrom(CREATED_DATE);
-    getOperationRequest.setCreatedTo(COMMITED_DATE);
+    getOperationRequest.setCreatedTo(COMMITTED_DATE);
     final SrvGetOperationRq request =
         OperationAdapter.requestGetOperation(getOperationRequest);
     assertHeaderInfo(request.getHeaderInfo());
@@ -292,14 +291,14 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
     Assert.assertNotNull(message);
     Assert.assertEquals(OPERATION_ID, message.getOperationId());
     Assert.assertEquals(CREATED_CALENDAR, message.getCreatedFrom());
-    Assert.assertEquals(COMMITED_CALENDAR, message.getCreatedTo());
+    Assert.assertEquals(COMMITTED_CALENDAR, message.getCreatedTo());
   }
 
   @Test
   public void testConvertSrvCommitOperationRs() {
     final Operation operation = OperationAdapter.convert(responseCommitOp);
     assertOperationBase(operation);
-    Assert.assertEquals(COMMITED_DATE, operation.getCommittedDate());
+    Assert.assertEquals(COMMITTED_DATE, operation.getCommittedDate());
   }
 
   @Test
@@ -343,7 +342,7 @@ public class OperationAdapterTest extends AsfsAdapterBaseTest {
       Assert.assertEquals(REP_ID.concat(postfix), operation.getRepresentativeId());
       Assert.assertEquals(date(cloneDateWithMinutes(CREATED_CALENDAR, i % 60)),
           operation.getCreatedDate());                                  // see setUp();
-      Assert.assertEquals(date(cloneDateWithMinutes(COMMITED_CALENDAR, (i * 2) % 60)),
+      Assert.assertEquals(date(cloneDateWithMinutes(COMMITTED_CALENDAR, (i * 2) % 60)),
           operation.getCommittedDate());
       Assert.assertEquals(SENDER_ACCOUNT_ID.concat(postfix), operation.getSenderAccountId());
       Assert.assertEquals(AccountType.getByCode(SENDER_ACCOUNT_TYPE_ID),

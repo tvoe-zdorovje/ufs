@@ -19,7 +19,7 @@ public class AccountResiduesDto implements Serializable {
    */
   private String currentBalance;
   /**
-   * Неснижаемый остаток.
+   * Не снижаемый остаток.
    */
   private String fixedBalance;
   /**

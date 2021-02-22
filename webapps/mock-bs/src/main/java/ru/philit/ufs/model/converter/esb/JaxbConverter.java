@@ -35,7 +35,7 @@ public class JaxbConverter {
   }
 
   /**
-   * Перобразует строку xml формата в транспортный объект из заданного пакета.
+   * Преобразует строку xml формата в транспортный объект из заданного пакета.
    */
   public Object getObject(String xml) throws JAXBException {
     if (StringUtils.isEmpty(xml)) {
